@@ -2,11 +2,21 @@
 
 A small data pipeline that tracks what the Philippine peso is worth, every day, on its own.
 
-Collecting since **August 2026**.
+**Live:** [presyo.vercel.app](https://presyo.vercel.app)
+
+## Status
+
+<!-- PRESYO:START -->
+
+_Waiting for the first run to fill this in._
+
+<!-- PRESYO:END -->
+
+## Why this exists
 
 Most portfolio projects run once and stop. This one runs every morning without anyone touching it, checks its own data before saving it, and keeps a log of every run — including the runs that fail.
 
-## Why
+### Why the peso
 
 A weaker peso means more money for a freelancer paid in dollars, and a better day to send money home for a family abroad. It also means imported goods creep up in price for everyone else. The number matters to a lot of people, but nobody watches it day to day.
 
@@ -55,6 +65,21 @@ python -m presyo.run
 5. Push to GitHub, then add `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` under **Settings → Secrets and variables → Actions**.
 6. Open the **Actions** tab and run the workflow once by hand to confirm it works.
 
+## The web page
+
+`web/` is a small React + Vite page that reads the same two tables over Supabase's REST endpoint and deploys to Vercel.
+
+```bash
+cd web
+npm install
+cp .env.example .env      # fill in the URL and the ANON key
+npm run dev
+```
+
+It uses the **anon** key, not the service key. That is safe: the policies in `sql/schema.sql` grant `anon` nothing but `SELECT`. The service key bypasses row-level security entirely and stays in GitHub Secrets, used only by the pipeline.
+
+To deploy: point Vercel at this repo, set the root directory to `web`, and add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables.
+
 ## Tests
 
 ```bash
@@ -72,8 +97,10 @@ src/presyo/
   validate.py        row checks, accept or reject with a reason
   db.py              Supabase upserts and run logging
   run.py             entry point
+  report.py          rewrites the Status block in this README
 sql/schema.sql       tables, indexes, security policies
 tests/               unit tests
+web/                 the public page — React + Vite, reads the same tables
 ```
 
 ## Roadmap
@@ -81,7 +108,7 @@ tests/               unit tests
 - [x] Phase 1 — daily exchange rates
 - [ ] Phase 2 — weekly fuel prices
 - [ ] Phase 3 — monthly rice prices and inflation
-- [ ] Phase 4 — public dashboard
+- [x] Phase 4 — public page (`web/`) and live status written into this README
 
 ---
 

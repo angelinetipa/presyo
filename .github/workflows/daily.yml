@@ -6,6 +6,9 @@ on:
     - cron: "15 1 * * *"
   workflow_dispatch: # lets you run it by hand from the Actions tab
 
+permissions:
+  contents: write # the report step commits the updated README
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
@@ -31,3 +34,28 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: python -m presyo.run
+
+      # Writes the latest rates and the last five runs into README.md, so the
+      # repo page shows whether this thing is alive without anyone needing
+      # database access. Runs even if the pipeline failed — a failed run is
+      # exactly the thing worth showing.
+      - name: Update README status
+        if: always()
+        env:
+          PYTHONPATH: src
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python -m presyo.report
+
+      - name: Commit README if it changed
+        if: always()
+        run: |
+          if git diff --quiet README.md; then
+            echo "No change."
+            exit 0
+          fi
+          git config user.name  "presyo-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore(status): daily update [skip ci]"
+          git push
