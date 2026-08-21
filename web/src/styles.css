@@ -638,3 +638,72 @@ a:hover {
     text-align: left;
   }
 }
+
+/* ---- what this is good for ------------------------------------------ */
+.uses {
+  list-style: none;
+  margin: 1.1rem 0 1.2rem;
+  padding: 0;
+}
+
+.use {
+  display: grid;
+  grid-template-columns: 1.7rem 1fr;
+  gap: 0.8rem;
+  padding: 0.75rem 0;
+}
+
+.use+.use {
+  border-top: 1px solid var(--rule);
+}
+
+.use__n {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--digit);
+  background: var(--board);
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.use__title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0.15rem 0 0.35rem;
+}
+
+.use__body {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.use__eg {
+  margin: 0.55rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  background: var(--paper);
+  padding: 0.6rem 0.75rem;
+  border-radius: 9px;
+  border-left: 3px solid var(--digit);
+}
+
+.sub-head {
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  margin: 1.3rem 0 0.2rem;
+}
+
+.sub-head:first-of-type {
+  margin-top: 1rem;
+}

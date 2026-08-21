@@ -15,7 +15,9 @@ import Board from './components/Board';
 import Converter from './components/Converter';
 import RateChart from './components/RateChart';
 import WhoItsFor from './components/WhoItsFor';
+import GoodFor from './components/GoodFor';
 import RunLog from './components/RunLog';
+import Source from './components/Source';
 import Limits from './components/Limits';
 
 export default function App() {
@@ -83,23 +85,12 @@ export default function App() {
           <Converter series={data.series} latest={data.latest} />
           <RateChart series={data.series} latest={data.latest} />
           <WhoItsFor />
+          <GoodFor />
           <RunLog runs={runs} />
         </>
       )}
 
-      <section className="panel">
-        <h2 className="panel__title">Where these numbers come from</h2>
-        <p className="prose">
-          A job runs every morning on its own. It fetches the day's rates, checks each one before
-          saving it — throwing out dates in the future, feeds that have gone stale, and any value
-          outside a sensible range for that currency — then writes to the database using the date
-          and the currency as the key, so running it twice changes nothing. Every run is logged,
-          including the ones that fail.
-        </p>
-        <p className="prose">
-          <a href="https://github.com/angelinetipa/presyo">See the code and the pipeline on GitHub →</a>
-        </p>
-      </section>
+      <Source />
 
       <Limits />
 

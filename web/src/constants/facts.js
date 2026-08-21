@@ -34,8 +34,8 @@ export const REMITTANCE_SOURCES = [
   { country: 'United States', share: 39.7, currency: 'USD', tracked: true },
   { country: 'Singapore', share: 7.3, currency: 'SGD', tracked: true },
   { country: 'Saudi Arabia', share: 6.6, currency: 'SAR', tracked: true },
-  { country: 'Japan', share: 5.0, currency: 'JPY', tracked: false },
-  { country: 'United Kingdom', share: 4.6, currency: 'GBP', tracked: false },
+  { country: 'Japan', share: 5.0, currency: 'JPY', tracked: true },
+  { country: 'United Kingdom', share: 4.6, currency: 'GBP', tracked: true },
   { country: 'United Arab Emirates', share: 4.6, currency: 'AED', tracked: true },
 ];
 
@@ -46,3 +46,8 @@ export const COVERED = REMITTANCE_SOURCES
 export const MISSED = REMITTANCE_SOURCES
   .filter((s) => !s.tracked)
   .reduce((sum, s) => sum + s.share, 0);
+
+// Hong Kong and Canada are tracked too, but the central bank does not
+// publish them among its top sources, so no share can be shown for them.
+// The coverage figure above is therefore a floor, not a ceiling.
+export const TRACKED_BEYOND_LIST = ['Hong Kong', 'Canada'];

@@ -26,12 +26,18 @@ export const colors = {
 
 // Fixed order so the board never reshuffles between loads. USD first,
 // because it is the one most readers came to check.
-export const CURRENCIES = ['USD', 'SAR', 'AED', 'SGD', 'HKD'];
+//
+// A currency only appears once the pipeline has recorded a value for it,
+// so the three added later stay hidden until their first run lands.
+export const CURRENCIES = ['USD', 'SAR', 'AED', 'SGD', 'HKD', 'JPY', 'GBP', 'CAD'];
 
 export const CURRENCY_NOTE = {
-  USD: 'Remote and freelance work',
+  USD: 'United States · remote and freelance work',
   SAR: 'Saudi Arabia',
   AED: 'United Arab Emirates',
   SGD: 'Singapore',
   HKD: 'Hong Kong',
+  JPY: 'Japan',
+  GBP: 'United Kingdom',
+  CAD: 'Canada',
 };
