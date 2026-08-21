@@ -33,7 +33,10 @@ def test_negative_rate_is_rejected():
 
 
 def test_untracked_currency_is_rejected():
-    assert "untracked" in validate.check_row(row(currency="JPY"), today=TODAY)
+    # NOT a real currency code. JPY was used here until it became tracked,
+    # and the test then failed for the right reason — the fixture, not the
+    # logic, had gone stale. Pick something that will never be added.
+    assert "untracked" in validate.check_row(row(currency="XTS"), today=TODAY)
 
 
 def test_split_separates_good_from_bad():

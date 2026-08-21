@@ -8,29 +8,7 @@ A small data pipeline that tracks what the Philippine peso is worth, every day, 
 
 <!-- PRESYO:START -->
 
-**Latest rates — 21 Aug 2026**
-
-| Currency | Pesos per unit |
-|---|---|
-| AED | 16.8055 |
-| HKD | 7.8689 |
-| SAR | 16.4581 |
-| SGD | 48.5263 |
-| USD | 61.7180 |
-
-**15 days collected** (06 Aug 2026 → 21 Aug 2026) · 75 rows
-
-**Recent runs**
-
-| Started | Status | Read | Loaded | Rejected |
-|---|---|---|---|---|
-| 21 Aug 2026 09:31 UTC | PASS | 5 | 5 | 0 |
-| 21 Aug 2026 09:20 UTC | PASS | 5 | 5 | 0 |
-| 21 Aug 2026 09:17 UTC | PASS | 5 | 5 | 0 |
-| 21 Aug 2026 02:35 UTC | PASS | 5 | 5 | 0 |
-| 20 Aug 2026 02:21 UTC | PASS | 5 | 5 | 0 |
-
-<sub>Updated automatically by the daily workflow · 21 Aug 2026 09:31 UTC</sub>
+_Waiting for the first run to fill this in._
 
 <!-- PRESYO:END -->
 
@@ -42,7 +20,9 @@ Most portfolio projects run once and stop. This one runs every morning without a
 
 A weaker peso means more money for a freelancer paid in dollars, and a better day to send money home for a family abroad. It also means imported goods creep up in price for everyone else. The number matters to a lot of people, but nobody watches it day to day.
 
-Currencies tracked: **USD** (remote and freelance work), **SAR, AED, HKD, SGD** (the largest OFW destinations).
+Currencies tracked: **USD** (the largest remittance source, and how most freelancers are paid), **SAR, AED, SGD, HKD** (the biggest work destinations), and **JPY, GBP, CAD** (Japan and the UK are both top remittance sources; Canada is a common destination for families settling permanently).
+
+Together these cover about **68%** of the cash sent home in 2025, by the country it came from. Source: Bangko Sentral ng Pilipinas.
 
 ## How it works
 
