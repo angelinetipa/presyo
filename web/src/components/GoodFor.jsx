@@ -8,9 +8,10 @@
 // gap between providers is far larger and far more reliable than the
 // day-to-day movement anyone would be trying to time.
 //
-// So: not "when should I send", but "what should I expect, and who
-// should I send through". The first question is unanswerable. The
-// second is answerable, and it is where the money actually is.
+// The second half answers the obvious follow-up — why not just search
+// for the rate? It starts by conceding what a search does better,
+// because a comparison that only lists your own strengths is an advert,
+// and nobody believes one.
 
 const USES = [
   {
@@ -30,13 +31,36 @@ const USES = [
   },
 ];
 
+const SEARCH_WINS = [
+  'Gives you today\u2019s number instantly, for any currency in the world.',
+  'Has years of history behind it, not weeks.',
+  'Updates through the day, not once every morning.',
+];
+
+const THIS_WINS = [
+  {
+    title: 'It keeps a record, not just a number',
+    body: 'A search shows you today and forgets it. Every day recorded here stays, in one public table anyone can read.',
+  },
+  {
+    title: 'It tells you when it is broken',
+    body: 'The run log above shows failed runs as well as good ones. A rate site will never tell you its feed went down — it will just show you an old number.',
+  },
+  {
+    title: 'It has nothing to sell you',
+    body: 'Most rate pages belong to companies that want you to transfer money through them. This one does not, which is why it can tell you to go compare providers instead.',
+  },
+  {
+    title: 'It is built for one country',
+    body: 'Eight currencies, chosen because most money sent to the Philippines comes from places that use them — not one hundred and seventy for everybody.',
+  },
+];
+
 export default function GoodFor() {
   return (
     <section className="panel">
       <h2 className="panel__title">What this is good for</h2>
-      <p className="panel__sub">
-        Three things a reference rate genuinely helps with.
-      </p>
+      <p className="panel__sub">Three things a reference rate genuinely helps with.</p>
 
       <ol className="uses">
         {USES.map((u, i) => (
@@ -53,9 +77,32 @@ export default function GoodFor() {
 
       <p className="prose">
         Notice that none of these is <em>when</em> to send. That question cannot be answered
-        honestly by anyone, and the section below explains why chasing it usually costs more
+        honestly by anyone, and the last section explains why chasing it usually costs more
         than it saves.
       </p>
+
+      <h3 className="sub-head">Why not just search for the rate?</h3>
+
+      <p className="prose">
+        Often you should — and for three things a search is simply better:
+      </p>
+      <ul className="plain">
+        {SEARCH_WINS.map((s) => <li key={s}>{s}</li>)}
+      </ul>
+
+      <p className="prose">
+        If today’s number is all you need, use one. These are the four things this page does
+        that a search box does not:
+      </p>
+
+      <div className="diffs">
+        {THIS_WINS.map((d) => (
+          <div key={d.title} className="diff">
+            <h4 className="diff__title">{d.title}</h4>
+            <p className="diff__body">{d.body}</p>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
