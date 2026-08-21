@@ -40,28 +40,47 @@ COVERAGE = {"days": 75, "rows": 375, "first": "2026-06-08", "last": "2026-08-21"
 
 
 def test_render_shows_every_tracked_currency():
-    out = report.render([{**r, "rate_date": "2026-08-21"} for r in LATEST], RUNS, COVERAGE)
+    out = report.render(LATEST, RUNS, COVERAGE)
     for currency in ("USD", "SAR", "AED", "SGD", "HKD"):
         assert currency in out
+
+
+def test_render_accepts_exactly_what_gather_returns():
+    """The regression that broke the first real run.
+
+    gather() selects only `currency, php_per_unit` — it filters BY
+    rate_date, so that column never comes back. render() was reading
+    latest[0]["rate_date"] and raising KeyError in production while every
+    test passed, because the fixtures bolted the key on by hand.
+
+    This fixture is the exact shape Supabase returns. Nothing added.
+    """
+    from_supabase = [
+        {"currency": "USD", "php_per_unit": 57.31},
+        {"currency": "SAR", "php_per_unit": 15.2788},
+    ]
+    out = report.render(from_supabase, RUNS, COVERAGE)
+    assert "57.3100" in out
+    assert "21 Aug 2026" in out   # the date comes from coverage
 
 
 def test_render_shows_coverage_so_the_claim_is_checkable():
     # The resume says "75 consecutive days". The README has to be able to
     # back that up without anyone logging into Supabase.
-    out = report.render([{**LATEST[0], "rate_date": "2026-08-21"}], RUNS, COVERAGE)
+    out = report.render(LATEST, RUNS, COVERAGE)
     assert "75 days collected" in out
     assert "375 rows" in out
 
 
 def test_render_does_not_hide_failed_runs():
     # A status block that only shows successes is marketing, not a log.
-    out = report.render([{**LATEST[0], "rate_date": "2026-08-21"}], RUNS, COVERAGE)
+    out = report.render(LATEST, RUNS, COVERAGE)
     assert "FAIL" in out
     assert "PASS" in out
 
 
 def test_render_formats_dates_readably():
-    out = report.render([{**LATEST[0], "rate_date": "2026-08-21"}], RUNS, COVERAGE)
+    out = report.render(LATEST, RUNS, COVERAGE)
     assert "21 Aug 2026" in out
 
 

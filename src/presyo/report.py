@@ -54,9 +54,11 @@ def render(latest: list[dict], runs: list[dict], coverage: dict) -> str:
         lines.append("_No rates loaded yet._")
         return "\n".join(lines)
 
-    rate_date = _fmt_date(str(latest[0]["rate_date"]))
-
-    lines.append(f"**Latest rates — {rate_date}**")
+    # The date comes from coverage, not from the rows. gather() filters
+    # fx_rates BY rate_date, so the column is not in the result at all —
+    # reading it off a row raised KeyError in the first real run while
+    # every test passed, because the fixtures had added the key by hand.
+    lines.append(f"**Latest rates — {_fmt_date(coverage['last'])}**")
     lines.append("")
     lines.append("| Currency | Pesos per unit |")
     lines.append("|---|---|")
