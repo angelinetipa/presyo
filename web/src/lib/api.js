@@ -7,17 +7,64 @@
 // SELECT and nothing else — the pipeline writes with the service key,
 // which never leaves GitHub Secrets.
 
-const URL = import.meta.env.VITE_SUPABASE_URL;
-const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Trailing slashes produce a double slash in the path, which Supabase
+// rejects — strip it once here rather than in every call.
+const URL = (import.meta.env.VITE_SUPABASE_URL ?? '').trim().replace(/\/+$/, '');
+const KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim();
+
+/**
+ * Says what is actually wrong with the configuration, or null if it
+ * looks usable.
+ *
+ * The first version only checked that the variables existed. A .env
+ * copied from .env.example and never filled in passes that check, then
+ * fails at the network with the browser's useless "Failed to fetch" —
+ * which tells you nothing about which of four possible mistakes you
+ * made. Every case below is one somebody will hit.
+ */
+function configProblem() {
+  if (!URL || !KEY) {
+    return 'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are not set. Copy .env.example to .env, fill both in, then restart the dev server — Vite only reads .env at startup.';
+  }
+  if (URL.includes('yourproject') || KEY.startsWith('your-')) {
+    return 'The .env file still has the placeholder values from .env.example. Replace them with your real Project URL and anon key from Supabase → Project Settings → API.';
+  }
+  if (/^["']|["']$/.test(URL) || /^["']|["']$/.test(KEY)) {
+    return 'Remove the quotes around the values in .env. Write VITE_SUPABASE_URL=https://abc.supabase.co with no quote marks.';
+  }
+  if (!URL.startsWith('https://')) {
+    return `VITE_SUPABASE_URL should start with https:// — it is currently "${URL}".`;
+  }
+  return null;
+}
 
 async function get(path) {
-  if (!URL || !KEY) {
-    throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Copy .env.example to .env.');
+  const problem = configProblem();
+  if (problem) throw new Error(problem);
+
+  const endpoint = `${URL}/rest/v1/${path}`;
+  let response;
+
+  try {
+    response = await fetch(endpoint, {
+      headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
+    });
+  } catch {
+    // fetch only throws for network-level failures: bad host, no
+    // connection, blocked request. An HTTP error status does not land here.
+    throw new Error(
+      `Could not reach ${URL}. Check the project URL is spelled correctly and that the Supabase project is not paused.`,
+    );
   }
-  const response = await fetch(`${URL}/rest/v1/${path}`, {
-    headers: { apikey: KEY, Authorization: `Bearer ${KEY}` },
-  });
-  if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+
+  if (response.status === 401 || response.status === 403) {
+    throw new Error(
+      'Supabase rejected the key. Check you used the anon public key, and that the read policies in sql/schema.sql have been run.',
+    );
+  }
+  if (!response.ok) {
+    throw new Error(`Supabase returned ${response.status} for ${path}`);
+  }
   return response.json();
 }
 
