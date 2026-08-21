@@ -1,15 +1,22 @@
 // src/App.jsx
-// One page, four blocks: what the peso is worth now, how it moved, how
-// the pipeline is behaving, and where the numbers come from.
+// The page reads: who this is for → what it is worth now → what your
+// money would be worth → how it moved → who feels it → what the
+// pipeline is doing → what none of it can tell you.
 //
-// It reads the same public tables the pipeline writes to, so the page
-// cannot show anything the database does not actually contain.
+// The order matters. The rate board is the hook, but the converter is
+// the point: a number in pesos beats a number on a board for anyone who
+// is not a trader. The limits sit last because they are the conclusion,
+// not a disclaimer — a page about somebody's household money has to say
+// plainly what it will not do.
 
 import { useEffect, useState } from 'react';
 import { fetchRates, fetchRuns, shape } from './lib/api';
 import Board from './components/Board';
+import Converter from './components/Converter';
 import RateChart from './components/RateChart';
+import WhoItsFor from './components/WhoItsFor';
 import RunLog from './components/RunLog';
+import Limits from './components/Limits';
 
 export default function App() {
   const [data, setData] = useState(null);
@@ -26,18 +33,22 @@ export default function App() {
   }, []);
 
   const lastRun = runs[0];
+  const ready = data && data.days > 0;
 
   return (
     <main className="wrap">
       <header className="masthead">
         <div>
           <h1 className="logo">Presyo</h1>
-          <p className="tagline">What the peso is worth, recorded every morning.</p>
+          <p className="tagline">
+            If you send money home, receive it, or get paid in a currency you cannot spend here —
+            this is what one unit has been worth, recorded every morning.
+          </p>
         </div>
         {lastRun && (
           <p className={`beat beat--${lastRun.status}`}>
             <span className="beat__dot" aria-hidden="true" />
-            Last run {lastRun.status === 'success' ? 'succeeded' : 'failed'}
+            Last check {lastRun.status === 'success' ? 'succeeded' : 'failed'}
           </p>
         )}
       </header>
@@ -54,46 +65,46 @@ export default function App() {
       {data && data.days === 0 && (
         <section className="panel">
           <h2 className="panel__title">Nothing recorded yet</h2>
-          <p className="panel__sub">
-            Run the pipeline once and this page will fill itself in.
-          </p>
+          <p className="panel__sub">Run the pipeline once and this page will fill itself in.</p>
         </section>
       )}
 
-      {data && data.days > 0 && (
+      {ready && (
         <>
           <Board latest={data.latest} lastDate={data.lastDate} />
           <p className="coverage">
-            <strong>{data.days}</strong> days collected, unattended, since{' '}
+            <strong>{data.days}</strong> days recorded, without anyone touching it, since{' '}
             {new Date(data.series[0].date).toLocaleDateString('en-PH', {
               day: 'numeric', month: 'long', year: 'numeric',
             })}
             .
           </p>
+
+          <Converter series={data.series} latest={data.latest} />
           <RateChart series={data.series} latest={data.latest} />
+          <WhoItsFor />
           <RunLog runs={runs} />
         </>
       )}
 
       <section className="panel">
-        <h2 className="panel__title">How the numbers get here</h2>
+        <h2 className="panel__title">Where these numbers come from</h2>
         <p className="prose">
-          A scheduled job fetches rates each morning, checks every row before saving it —
-          rejecting future dates, stale feeds, and values outside a sane band for that
-          currency — then writes to Postgres using the date and currency as the key, so
-          re-running it changes nothing. Each run logs what it read, loaded, and rejected.
+          A job runs every morning on its own. It fetches the day's rates, checks each one before
+          saving it — throwing out dates in the future, feeds that have gone stale, and any value
+          outside a sensible range for that currency — then writes to the database using the date
+          and the currency as the key, so running it twice changes nothing. Every run is logged,
+          including the ones that fail.
         </p>
         <p className="prose">
-          Rates are indicative, from a public feed. They are not what a bank or remittance
-          counter will quote you.
-        </p>
-        <p className="prose">
-          <a href="https://github.com/angelinetipa/presyo">Source and pipeline on GitHub →</a>
+          <a href="https://github.com/angelinetipa/presyo">See the code and the pipeline on GitHub →</a>
         </p>
       </section>
 
+      <Limits />
+
       <footer className="foot">
-        Data: open.er-api.com · Built by{' '}
+        Rates from open.er-api.com · Built by{' '}
         <a href="https://opal-portfolio.vercel.app">Ma. Angeline Tipa</a>
       </footer>
     </main>
