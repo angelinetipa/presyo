@@ -9,7 +9,7 @@
 //
 // Outside figures live in constants/facts.js with their sources.
 
-import { FACTS, REMITTANCE_SOURCES, COVERED, MISSED } from '../constants/facts';
+import { FACTS, REMITTANCE_SOURCES, COVERED, MISSED, TRACKED_BEYOND_LIST } from '../constants/facts';
 
 const peso = (n) => '\u20B1' + Math.round(n).toLocaleString('en-PH');
 
@@ -98,10 +98,17 @@ export default function WhoItsFor() {
         </ul>
 
         <p className="prose">
-          Together the tracked currencies account for about <strong>{COVERED.toFixed(0)}%</strong>{' '}
-          of the cash sent home in 2025. Japan and the United Kingdom, another{' '}
-          <strong>{MISSED.toFixed(0)}%</strong>, are not here — so if that is where your money
-          comes from, this page cannot help you yet.
+          Together the tracked currencies account for at least{' '}
+          <strong>{COVERED.toFixed(0)}%</strong> of the cash sent home in 2025.
+          {MISSED > 0 && (
+            <> Another <strong>{MISSED.toFixed(0)}%</strong> comes from places not tracked here,
+              so if that is where your money comes from, this page cannot help you yet.</>
+          )}
+        </p>
+        <p className="prose">
+          {TRACKED_BEYOND_LIST.join(' and ')} are tracked as well, but the central bank does not
+          publish them among its top sources — so no share can be shown for them, and the figure
+          above is a floor rather than a total.
         </p>
         <p className="cite">Source: Bangko Sentral ng Pilipinas, 2025 full-year data.</p>
       </section>
