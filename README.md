@@ -8,32 +8,32 @@ A small data pipeline that tracks what the Philippine peso is worth, every day, 
 
 <!-- PRESYO:START -->
 
-**Latest rates — 26 Sep 2026**
+**Latest rates — 27 Sep 2026**
 
 | Currency | Pesos per unit |
 |---|---|
-| AED | 17.0208 |
-| CAD | 44.2283 |
-| GBP | 82.7549 |
-| HKD | 7.9685 |
-| JPY | 0.3968 |
-| SAR | 16.6691 |
-| SGD | 48.9188 |
-| USD | 62.5090 |
+| AED | 17.0213 |
+| CAD | 44.2176 |
+| GBP | 82.7857 |
+| HKD | 7.9686 |
+| JPY | 0.3970 |
+| SAR | 16.6696 |
+| SGD | 48.9209 |
+| USD | 62.5109 |
 
-**51 days collected** (06 Aug 2026 → 26 Sep 2026) · 363 rows
+**52 days collected** (06 Aug 2026 → 27 Sep 2026) · 371 rows
 
 **Recent runs**
 
 | Started | Status | Read | Loaded | Rejected |
 |---|---|---|---|---|
+| 27 Sep 2026 06:35 UTC | PASS | 8 | 8 | 0 |
 | 26 Sep 2026 06:07 UTC | PASS | 8 | 8 | 0 |
 | 25 Sep 2026 06:08 UTC | PASS | 8 | 8 | 0 |
 | 24 Sep 2026 06:09 UTC | PASS | 8 | 8 | 0 |
 | 23 Sep 2026 05:55 UTC | PASS | 8 | 8 | 0 |
-| 22 Sep 2026 06:09 UTC | PASS | 8 | 8 | 0 |
 
-<sub>Updated automatically by the daily workflow · 26 Sep 2026 06:07 UTC</sub>
+<sub>Updated automatically by the daily workflow · 27 Sep 2026 06:35 UTC</sub>
 
 <!-- PRESYO:END -->
 
