@@ -12,14 +12,14 @@ A small data pipeline that tracks what the Philippine peso is worth, every day, 
 
 | Currency | Pesos per unit |
 |---|---|
-| AED | 17.1073 |
-| CAD | 44.0690 |
-| GBP | 83.1475 |
-| HKD | 8.0054 |
-| JPY | 0.3971 |
-| SAR | 16.7538 |
-| SGD | 49.0547 |
-| USD | 62.8267 |
+| AED | 17.0965 |
+| CAD | 43.9878 |
+| GBP | 82.9840 |
+| HKD | 8.0007 |
+| JPY | 0.3960 |
+| SAR | 16.7432 |
+| SGD | 49.0225 |
+| USD | 62.7869 |
 
 **67 days collected** (06 Aug 2026 → 12 Oct 2026) · 491 rows
 
@@ -27,13 +27,13 @@ A small data pipeline that tracks what the Philippine peso is worth, every day, 
 
 | Started | Status | Read | Loaded | Rejected |
 |---|---|---|---|---|
+| 13 Oct 2026 07:40 UTC | PASS | 8 | 8 | 0 |
 | 12 Oct 2026 07:18 UTC | PASS | 8 | 8 | 0 |
 | 11 Oct 2026 07:08 UTC | PASS | 8 | 8 | 0 |
 | 10 Oct 2026 07:01 UTC | PASS | 8 | 8 | 0 |
 | 09 Oct 2026 07:20 UTC | PASS | 8 | 8 | 0 |
-| 08 Oct 2026 07:19 UTC | PASS | 8 | 8 | 0 |
 
-<sub>Updated automatically by the daily workflow · 12 Oct 2026 07:18 UTC</sub>
+<sub>Updated automatically by the daily workflow · 13 Oct 2026 07:40 UTC</sub>
 
 <!-- PRESYO:END -->
 
