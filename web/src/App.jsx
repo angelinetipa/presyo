@@ -15,6 +15,7 @@ import RateChart from './components/RateChart';
 import BudgetSplit from './components/BudgetSplit';
 import RunDots from './components/RunDots';
 import AboutStrip from './components/AboutStrip';
+import { formatDay } from './lib/format';
 
 export default function App() {
   const [data, setData] = useState(null);
@@ -75,9 +76,7 @@ export default function App() {
             <Board latest={data.latest} lastDate={data.lastDate} />
             <p className="coverage">
               <strong>{data.days}</strong> days recorded, without anyone touching it, since{' '}
-              {new Date(data.series[0].date).toLocaleDateString('en-PH', {
-                day: 'numeric', month: 'long', year: 'numeric',
-              })}
+              {formatDay(data.series[0].date, 'long')}
               .
             </p>
           </div>
@@ -92,7 +91,11 @@ export default function App() {
         </div>
       )}
 
-      <AboutStrip runs={runs} />
+      <AboutStrip
+        runs={runs}
+        days={data?.days ?? 0}
+        since={data?.days ? formatDay(data.series[0].date, 'long') : ''}
+      />
 
       <footer className="foot">
         Rates from open.er-api.com · Built by{' '}

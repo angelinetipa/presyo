@@ -24,16 +24,16 @@ const KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim();
  */
 function configProblem() {
   if (!URL || !KEY) {
-    return 'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are not set. Copy .env.example to .env, fill both in, then restart the dev server — Vite only reads .env at startup.';
+    return 'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are not set. Copy .env.example to .env, fill both in, then restart the dev server. Vite only reads .env at startup.';
   }
   if (URL.includes('yourproject') || KEY.startsWith('your-')) {
-    return 'The .env file still has the placeholder values from .env.example. Replace them with your real Project URL and anon key from Supabase → Project Settings → API.';
+    return 'The .env file still has the placeholder values from .env.example. Replace them with your real Project URL and anon key from Supabase under Project Settings, then API.';
   }
   if (/^["']|["']$/.test(URL) || /^["']|["']$/.test(KEY)) {
     return 'Remove the quotes around the values in .env. Write VITE_SUPABASE_URL=https://abc.supabase.co with no quote marks.';
   }
   if (!URL.startsWith('https://')) {
-    return `VITE_SUPABASE_URL should start with https:// — it is currently "${URL}".`;
+    return `VITE_SUPABASE_URL should start with https://. It is currently "${URL}".`;
   }
   return null;
 }

@@ -970,6 +970,12 @@ a:hover {
   padding-bottom: 0;
 }
 
+/* The fold label already acts as the title, so lists start close to the top. */
+.fold__body .uses,
+.fold__body .limits {
+  margin-top: 0.3rem;
+}
+
 /* ---- small screens ---------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .dash {

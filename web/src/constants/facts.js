@@ -1,15 +1,14 @@
 // src/constants/facts.js
-// Every outside figure on this page, with its source.
+// Outside figures shown on the page, each with its source.
 //
-// Kept in one file so a stale number is easy to find and update, and so
-// nothing appears on screen without a citation attached. The page's own
-// figures come from the database; these are the ones that give them
-// scale, and they age — check them once a year.
+// Keep them in this one file so a stale number is easy to find. Nothing
+// should appear on screen without a source next to it. Check the figures
+// once a year.
 
 export const FACTS = {
   ofwCount: {
     value: '2.19 million',
-    text: 'Filipinos worked abroad in 2024 — up from 2.16 million the year before.',
+    text: 'Filipinos worked abroad in 2024, up from 2.16 million the year before.',
     detail: 'More than half, 1.25 million, are women.',
     source: 'Philippine Statistics Authority, Survey on Overseas Filipinos (Dec 2025)',
   },
@@ -21,15 +20,14 @@ export const FACTS = {
   },
   totalRemittance: {
     value: '$35.63 billion',
-    text: 'in cash came home in 2025, a record — equal to 7.3% of everything the country produced that year.',
+    text: 'in cash came home in 2025, a record. That equals 7.3% of everything the country produced that year.',
     source: 'Bangko Sentral ng Pilipinas (Feb 2026)',
   },
 };
 
 // Share of 2025 cash remittances by the country the money came from.
-// Used to show honestly how much of the picture these five currencies
-// actually cover — and how much they miss.
-// Source: Bangko Sentral ng Pilipinas, 2025 full-year data.
+// Used to show how much of the picture the tracked currencies cover.
+// Source: Bangko Sentral ng Pilipinas, 2025 full year data.
 export const REMITTANCE_SOURCES = [
   { country: 'United States', share: 39.7, currency: 'USD', tracked: true },
   { country: 'Singapore', share: 7.3, currency: 'SGD', tracked: true },
@@ -48,6 +46,6 @@ export const MISSED = REMITTANCE_SOURCES
   .reduce((sum, s) => sum + s.share, 0);
 
 // Hong Kong and Canada are tracked too, but the central bank does not
-// publish them among its top sources, so no share can be shown for them.
-// The coverage figure above is therefore a floor, not a ceiling.
+// list them among its top sources, so no share can be shown for them.
+// COVERED is therefore a floor, not a total.
 export const TRACKED_BEYOND_LIST = ['Hong Kong', 'Canada'];

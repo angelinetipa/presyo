@@ -18,14 +18,13 @@ import {
 } from 'recharts';
 import { colors } from '../constants/theme';
 import { rankCurrencies, defaultCurrency } from '../lib/rank';
+import { formatDay } from '../lib/format';
 
 const PESO = '₱';
 const SHORT_RECORD = 30; // below this many days, the page says it is too early to call a trend
 
-// Dates are stored as plain days. Reading them as UTC keeps the same
-// day on screen for viewers in any time zone.
-const shortDate = (iso) =>
-  new Date(iso).toLocaleDateString('en-PH', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+// Dates are plain days, so they are formatted in UTC. See lib/format.js.
+const shortDate = (iso) => formatDay(iso);
 
 // Values under 1 (such as JPY) need more decimals to be readable.
 const fmt = (v) => (v < 1 ? v.toFixed(4) : v.toFixed(2));

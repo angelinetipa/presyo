@@ -1,9 +1,9 @@
 // src/components/RunLog.jsx
-// The health log, shown rather than hidden.
+// Recent pipeline runs, failed ones included.
+// Shown inside the "Health log" fold. A log that only lists successes
+// cannot tell a dead pipeline from one that has not run yet.
 //
-// A status page that only reports successes tells you nothing, because
-// a dead pipeline looks exactly the same as one that has not run yet.
-// Failed runs appear here in full, with their row counts.
+// Start times are real moments, so they show in the viewer's local time.
 
 import { colors } from '../constants/theme';
 
@@ -17,8 +17,7 @@ export default function RunLog({ runs }) {
 
   return (
     <section className="panel">
-      <h2 className="panel__title">Recent runs</h2>
-      <p className="panel__sub">
+      <p className="panel__sub" style={{ marginTop: 0 }}>
         Every run writes a row, including the ones that fail.
       </p>
 

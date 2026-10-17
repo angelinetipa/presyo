@@ -1,15 +1,17 @@
 // src/components/Board.jsx
-// The rate board. A dark panel, currency codes on the left, figures
-// right aligned so the decimal points stack.
+// The rate board, styled like a money changer's panel: a dark background,
+// currency codes on the left, and right aligned figures so the decimal
+// points line up.
 //
 // Rows are ranked by pesos per unit, highest first, using rankCurrencies.
 // Figures use tabular-nums so a changing digit does not shift the column.
 
 import { colors, CURRENCY_NOTE } from '../constants/theme';
 import { rankCurrencies } from '../lib/rank';
+import { formatDay } from '../lib/format';
 
 function Delta({ pct }) {
-  if (pct == null) return <span style={{ color: colors.flat }}>—</span>;
+  if (pct == null) return <span style={{ color: colors.flat }}>n/a</span>;
   const flat = Math.abs(pct) < 0.005;
   const up = pct > 0;
   const color = flat ? colors.flat : up ? colors.up : colors.down;
@@ -28,11 +30,7 @@ export default function Board({ latest, lastDate }) {
     <section className="board" aria-label="Latest exchange rates">
       <header className="board__head">
         <span>Pesos per unit</span>
-        <span>
-          {lastDate
-            ? new Date(lastDate).toLocaleDateString('en-PH', { day: 'numeric', month: 'short', year: 'numeric' })
-            : '—'}
-        </span>
+        <span>{lastDate ? formatDay(lastDate, 'medium') : 'n/a'}</span>
       </header>
 
       <ol className="board__rows">
