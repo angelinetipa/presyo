@@ -1,29 +1,27 @@
 // src/components/RateChart.jsx
-// One currency at a time, in actual pesos.
+// One currency at a time, in pesos.
 //
-// Plotting all five together would need a shared axis, and USD near 57
-// against HKD near 7 would flatten the small ones into a straight line.
-// Indexing everything to a percentage would fix the scale but hide the
-// number people actually want, which is what one dollar is worth today.
-// So: a selector, real pesos, one line.
+// Each currency sits on a very different scale, so they share no axis.
+// A selector switches between them. Buttons follow the board order,
+// highest peso value first, and the chart starts on USD.
 //
-// The y-axis does not start at zero here, on purpose. This is a rate
-// that moves within a narrow band; a zero baseline would compress
-// months of real movement into a flat line. The axis is labelled so the
-// range is never a surprise.
+// The y axis does not start at zero. The rate moves in a narrow band,
+// and a zero baseline would flatten it. The axis is labelled so the
+// range is clear.
 
 import { useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { colors, CURRENCIES } from '../constants/theme';
+import { colors } from '../constants/theme';
+import { rankCurrencies, defaultCurrency } from '../lib/rank';
 
 const shortDate = (iso) =>
   new Date(iso).toLocaleDateString('en-PH', { day: 'numeric', month: 'short' });
 
 export default function RateChart({ series, latest }) {
-  const available = CURRENCIES.filter((c) => latest[c]);
-  const [active, setActive] = useState(available[0] ?? 'USD');
+  const available = rankCurrencies(latest);
+  const [active, setActive] = useState(defaultCurrency(latest));
 
   const points = series.filter((d) => d[active] != null);
   if (points.length === 0) return null;

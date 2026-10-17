@@ -1,23 +1,19 @@
 // src/components/Board.jsx
-// The signature element: a money changer's rate board.
+// The rate board. A dark panel, currency codes on the left, figures
+// right aligned so the decimal points stack.
 //
-// Every mall in the Philippines has one — a dark panel, currency codes
-// down the left, figures right-aligned in a column so the decimal
-// points stack. Borrowing that vernacular says what the page is faster
-// than a heading would, and it is where the page spends its boldness.
-// Everything else on the page stays quiet.
-//
-// Figures use tabular-nums so a digit changing does not shift the
-// column. On a real board the numbers never jump sideways.
+// Rows are ranked by pesos per unit, highest first, using rankCurrencies.
+// Figures use tabular-nums so a changing digit does not shift the column.
 
-import { colors, CURRENCIES, CURRENCY_NOTE } from '../constants/theme';
+import { colors, CURRENCY_NOTE } from '../constants/theme';
+import { rankCurrencies } from '../lib/rank';
 
 function Delta({ pct }) {
   if (pct == null) return <span style={{ color: colors.flat }}>—</span>;
   const flat = Math.abs(pct) < 0.005;
   const up = pct > 0;
   const color = flat ? colors.flat : up ? colors.up : colors.down;
-  const mark = flat ? '\u2013' : up ? '\u25B2' : '\u25BC';
+  const mark = flat ? '–' : up ? '▲' : '▼';
   return (
     <span style={{ color }}>
       {mark} {Math.abs(pct).toFixed(2)}%
@@ -26,13 +22,17 @@ function Delta({ pct }) {
 }
 
 export default function Board({ latest, lastDate }) {
-  const shown = CURRENCIES.filter((c) => latest[c]);
+  const shown = rankCurrencies(latest);
 
   return (
     <section className="board" aria-label="Latest exchange rates">
       <header className="board__head">
         <span>Pesos per unit</span>
-        <span>{lastDate ? new Date(lastDate).toLocaleDateString('en-PH', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</span>
+        <span>
+          {lastDate
+            ? new Date(lastDate).toLocaleDateString('en-PH', { day: 'numeric', month: 'short', year: 'numeric' })
+            : '—'}
+        </span>
       </header>
 
       <ol className="board__rows">
@@ -50,7 +50,7 @@ export default function Board({ latest, lastDate }) {
       </ol>
 
       <footer className="board__foot">
-        Change shown against the previous recorded day.
+        Highest to lowest. Change is against the previous recorded day.
       </footer>
     </section>
   );

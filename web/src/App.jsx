@@ -1,16 +1,15 @@
 // src/App.jsx
-// The page reads: who this is for → what it is worth now → what your
-// money would be worth → how it moved → who feels it → what the
-// pipeline is doing → what none of it can tell you.
+// Page layout. A short header, a tab bar, and one panel at a time.
 //
-// The order matters. The rate board is the hook, but the converter is
-// the point: a number in pesos beats a number on a board for anyone who
-// is not a trader. The limits sit last because they are the conclusion,
-// not a disclaimer — a page about somebody's household money has to say
-// plainly what it will not do.
+//   Rates         the board and the chart, for a quick read
+//   Budget split  the calculator (holds the converter until the new one is built)
+//   About         who it is for, what it is good for, run log, sources, limits
+//
+// The active tab is kept in the URL hash, so a refresh stays on the same tab.
 
 import { useEffect, useState } from 'react';
 import { fetchRates, fetchRuns, shape } from './lib/api';
+import Tabs from './components/Tabs';
 import Board from './components/Board';
 import Converter from './components/Converter';
 import RateChart from './components/RateChart';
@@ -20,10 +19,22 @@ import RunLog from './components/RunLog';
 import Source from './components/Source';
 import Limits from './components/Limits';
 
+const TABS = [
+  { id: 'rates', label: 'Rates' },
+  { id: 'budget', label: 'Budget split' },
+  { id: 'about', label: 'About' },
+];
+
+const tabFromHash = () => {
+  const id = window.location.hash.replace('#', '');
+  return TABS.some((t) => t.id === id) ? id : 'rates';
+};
+
 export default function App() {
   const [data, setData] = useState(null);
   const [runs, setRuns] = useState([]);
   const [error, setError] = useState(null);
+  const [tab, setTab] = useState(tabFromHash);
 
   useEffect(() => {
     Promise.all([fetchRates(), fetchRuns()])
@@ -34,6 +45,11 @@ export default function App() {
       .catch((e) => setError(e.message));
   }, []);
 
+  function chooseTab(id) {
+    setTab(id);
+    window.history.replaceState(null, '', `#${id}`);
+  }
+
   const lastRun = runs[0];
   const ready = data && data.days > 0;
 
@@ -43,7 +59,7 @@ export default function App() {
         <div>
           <h1 className="logo">Presyo</h1>
           <p className="tagline">
-            If you send money home, receive it, or get paid in a currency you cannot spend here —
+            If you send money home, receive it, or get paid in a currency you cannot spend here,
             this is what one unit has been worth, recorded every morning.
           </p>
         </div>
@@ -71,28 +87,42 @@ export default function App() {
         </section>
       )}
 
-      {ready && (
-        <>
-          <Board latest={data.latest} lastDate={data.lastDate} />
-          <p className="coverage">
-            <strong>{data.days}</strong> days recorded, without anyone touching it, since{' '}
-            {new Date(data.series[0].date).toLocaleDateString('en-PH', {
-              day: 'numeric', month: 'long', year: 'numeric',
-            })}
-            .
-          </p>
+      <Tabs tabs={TABS} active={tab} onChange={chooseTab} />
 
+      <div
+        className="tabpanel"
+        role="tabpanel"
+        id={`panel-${tab}`}
+        aria-labelledby={`tab-${tab}`}
+      >
+        {tab === 'rates' && ready && (
+          <>
+            <Board latest={data.latest} lastDate={data.lastDate} />
+            <p className="coverage">
+              <strong>{data.days}</strong> days recorded, without anyone touching it, since{' '}
+              {new Date(data.series[0].date).toLocaleDateString('en-PH', {
+                day: 'numeric', month: 'long', year: 'numeric',
+              })}
+              .
+            </p>
+            <RateChart series={data.series} latest={data.latest} />
+          </>
+        )}
+
+        {tab === 'budget' && ready && (
           <Converter series={data.series} latest={data.latest} />
-          <RateChart series={data.series} latest={data.latest} />
-          <WhoItsFor />
-          <GoodFor />
-          <RunLog runs={runs} />
-        </>
-      )}
+        )}
 
-      <Source />
-
-      <Limits />
+        {tab === 'about' && (
+          <>
+            <WhoItsFor />
+            <GoodFor />
+            <RunLog runs={runs} />
+            <Source />
+            <Limits />
+          </>
+        )}
+      </div>
 
       <footer className="foot">
         Rates from open.er-api.com · Built by{' '}

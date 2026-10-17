@@ -1,21 +1,17 @@
 // src/constants/theme.js
-// The palette comes from the subject, not from a template.
+// Colours and the list of tracked currencies.
 //
-// Presyo is about money changed at a counter, so the page borrows the
-// vernacular of a money changer's rate board: a dark panel, amber
-// figures, everything set in monospace so the decimal points line up in
-// a column the way they do on a real board.
-//
-// Deliberately unlike Aralite, which uses the DepEd flag colours.
+// The palette follows a money changer's rate board: a dark panel, amber
+// figures, and monospace type so decimal points line up in a column.
 
 export const colors = {
   paper: '#F1F0EC',   // warm grey, like a printed remittance slip
   card: '#FFFFFF',
-  ink: '#16232E',     // deep slate-navy, the ink on that slip
+  ink: '#16232E',     // deep slate navy
   inkSoft: '#5E6C77',
   rule: '#DDDCD6',
 
-  board: '#16232E',   // the panel itself
+  board: '#16232E',   // the board panel
   boardRule: '#2C3D4B',
   digit: '#E8B04B',   // amber, the colour of a lit board
 
@@ -24,11 +20,12 @@ export const colors = {
   flat: '#8A959D',
 };
 
-// Fixed order so the board never reshuffles between loads. USD first,
-// because it is the one most readers came to check.
+// Master list of tracked currencies. The board and the selectors sort
+// it by peso value, highest first (see lib/rank.js), so the order here
+// only breaks ties.
 //
-// A currency only appears once the pipeline has recorded a value for it,
-// so the three added later stay hidden until their first run lands.
+// A currency appears only once the pipeline has recorded a value for it,
+// so a newly added currency stays hidden until its first run lands.
 export const CURRENCIES = ['USD', 'SAR', 'AED', 'SGD', 'HKD', 'JPY', 'GBP', 'CAD'];
 
 export const CURRENCY_NOTE = {
