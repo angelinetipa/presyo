@@ -56,7 +56,7 @@ export default function RateChart({ series, latest }) {
         </div>
       </div>
 
-      <div style={{ height: 300 }}>
+      <div className="chart__box">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={points} margin={{ top: 10, right: 16, bottom: 4, left: 4 }}>
             <CartesianGrid stroke={colors.rule} vertical={false} />

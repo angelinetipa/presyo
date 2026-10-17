@@ -1,40 +1,25 @@
 // src/App.jsx
-// Page layout. A short header, a tab bar, and one panel at a time.
+// One dashboard, no tabs. It reads left to right, top to bottom.
 //
-//   Rates         the board and the chart, for a quick read
-//   Budget split  the calculator (holds the converter until the new one is built)
-//   About         who it is for, what it is good for, run log, sources, limits
+//   Header         title, last check, and a dot for each recent run
+//   Row one        rate board (left), chart (right)
+//   Row two        calculator, full width (holds the converter until the new one is built)
+//   Bottom         slim folds with the reading material
 //
-// The active tab is kept in the URL hash, so a refresh stays on the same tab.
+// Below 900px wide the columns stack in the same order.
 
 import { useEffect, useState } from 'react';
 import { fetchRates, fetchRuns, shape } from './lib/api';
-import Tabs from './components/Tabs';
 import Board from './components/Board';
-import Converter from './components/Converter';
 import RateChart from './components/RateChart';
-import WhoItsFor from './components/WhoItsFor';
-import GoodFor from './components/GoodFor';
-import RunLog from './components/RunLog';
-import Source from './components/Source';
-import Limits from './components/Limits';
-
-const TABS = [
-  { id: 'rates', label: 'Rates' },
-  { id: 'budget', label: 'Budget split' },
-  { id: 'about', label: 'About' },
-];
-
-const tabFromHash = () => {
-  const id = window.location.hash.replace('#', '');
-  return TABS.some((t) => t.id === id) ? id : 'rates';
-};
+import Converter from './components/Converter';
+import RunDots from './components/RunDots';
+import AboutStrip from './components/AboutStrip';
 
 export default function App() {
   const [data, setData] = useState(null);
   const [runs, setRuns] = useState([]);
   const [error, setError] = useState(null);
-  const [tab, setTab] = useState(tabFromHash);
 
   useEffect(() => {
     Promise.all([fetchRates(), fetchRuns()])
@@ -45,11 +30,6 @@ export default function App() {
       .catch((e) => setError(e.message));
   }, []);
 
-  function chooseTab(id) {
-    setTab(id);
-    window.history.replaceState(null, '', `#${id}`);
-  }
-
   const lastRun = runs[0];
   const ready = data && data.days > 0;
 
@@ -59,15 +39,17 @@ export default function App() {
         <div>
           <h1 className="logo">Presyo</h1>
           <p className="tagline">
-            If you send money home, receive it, or get paid in a currency you cannot spend here,
-            this is what one unit has been worth, recorded every morning.
+            What foreign money is worth in pesos, recorded every morning.
           </p>
         </div>
         {lastRun && (
-          <p className={`beat beat--${lastRun.status}`}>
-            <span className="beat__dot" aria-hidden="true" />
-            Last check {lastRun.status === 'success' ? 'succeeded' : 'failed'}
-          </p>
+          <div className="status">
+            <p className={`beat beat--${lastRun.status}`}>
+              <span className="beat__dot" aria-hidden="true" />
+              Last check {lastRun.status === 'success' ? 'succeeded' : 'failed'}
+            </p>
+            <RunDots runs={runs} />
+          </div>
         )}
       </header>
 
@@ -87,16 +69,9 @@ export default function App() {
         </section>
       )}
 
-      <Tabs tabs={TABS} active={tab} onChange={chooseTab} />
-
-      <div
-        className="tabpanel"
-        role="tabpanel"
-        id={`panel-${tab}`}
-        aria-labelledby={`tab-${tab}`}
-      >
-        {tab === 'rates' && ready && (
-          <>
+      {ready && (
+        <div className="dash">
+          <div className="dash__left">
             <Board latest={data.latest} lastDate={data.lastDate} />
             <p className="coverage">
               <strong>{data.days}</strong> days recorded, without anyone touching it, since{' '}
@@ -105,24 +80,19 @@ export default function App() {
               })}
               .
             </p>
+          </div>
+
+          <div className="dash__right">
             <RateChart series={data.series} latest={data.latest} />
-          </>
-        )}
+          </div>
 
-        {tab === 'budget' && ready && (
-          <Converter series={data.series} latest={data.latest} />
-        )}
+          <div className="dash__wide">
+            <Converter series={data.series} latest={data.latest} />
+          </div>
+        </div>
+      )}
 
-        {tab === 'about' && (
-          <>
-            <WhoItsFor />
-            <GoodFor />
-            <RunLog runs={runs} />
-            <Source />
-            <Limits />
-          </>
-        )}
-      </div>
+      <AboutStrip runs={runs} />
 
       <footer className="foot">
         Rates from open.er-api.com · Built by{' '}
