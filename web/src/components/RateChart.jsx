@@ -59,11 +59,14 @@ export default function RateChart({ series, latest }) {
   const early = points.length < SHORT_RECORD;
 
   // Label the low and the high only when they are real points of interest:
-  // not when the line is flat, and not when they are the same dot as today.
+  // not when the line is flat, and not when they sit within a few days of
+  // today, where the label would crowd the amber dot.
   const spread = low[active] !== high[active];
+  const lastIndex = points.length - 1;
+  const farFromToday = (point) => lastIndex - points.indexOf(point) >= 3;
   const marks = [];
-  if (spread && low.date !== last.date) marks.push({ key: 'low', point: low, text: `Low ${fmt(low[active])}`, position: 'bottom', fill: colors.down });
-  if (spread && high.date !== last.date) marks.push({ key: 'high', point: high, text: `High ${fmt(high[active])}`, position: 'top', fill: colors.up });
+  if (spread && farFromToday(low)) marks.push({ key: 'low', point: low, text: `Low ${fmt(low[active])}`, position: 'bottom', fill: colors.down });
+  if (spread && farFromToday(high)) marks.push({ key: 'high', point: high, text: `High ${fmt(high[active])}`, position: 'top', fill: colors.up });
 
   return (
     <section className="panel">

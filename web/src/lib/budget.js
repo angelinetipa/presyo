@@ -61,6 +61,32 @@ export function makeRow({ label = 'New row', mode = 'percent', value = '', unit 
   return { id: `row-${Date.now().toString(36)}-${counter}`, label, mode, value, unit };
 }
 
+// Text for a value box. Zero becomes an empty box.
+const asText = (n, decimals) => {
+  const v = Number(n.toFixed(decimals));
+  return v === 0 ? '' : String(v);
+};
+
+/**
+ * Moves a row between the three kinds and fills in its value so the row
+ * keeps its current result.
+ *
+ * kind     'percent', 'source' (fixed in the income currency), or 'php' (fixed in pesos)
+ * current  this row's entry from computeBudget, taken before the change
+ */
+export function switchKind(row, kind, current) {
+  const now = row.mode === 'fixed' ? row.unit : 'percent';
+  if (kind === now) return row;
+
+  if (kind === 'percent') {
+    return { ...row, mode: 'percent', unit: 'source', value: asText(current.share, 2) };
+  }
+  if (kind === 'source') {
+    return { ...row, mode: 'fixed', unit: 'source', value: asText(current.source, 2) };
+  }
+  return { ...row, mode: 'fixed', unit: 'php', value: asText(current.php, 0) };
+}
+
 function emptyResult(rows, income, rate, status) {
   return {
     status,
@@ -77,6 +103,7 @@ function emptyResult(rows, income, rate, status) {
       sourceRounded: 0,
       phpRounded: 0,
       share: 0,
+      shareRounded: 0,
     })),
     percentSum: 0,
     fixedSource: 0,
@@ -141,6 +168,7 @@ export function computeBudget({ total, rate, rows }) {
   );
   const sourcesRounded = roundShares(sources, 2);
   const phpsRounded = roundShares(phps, 0);
+  const sharesRounded = roundShares(sources.map((v) => (v / income) * 100), 0);
 
   const assigned = sources.reduce((sum, v) => sum + v, 0);
   const diff = income - assigned;
@@ -166,6 +194,7 @@ export function computeBudget({ total, rate, rows }) {
       sourceRounded: sourcesRounded[i],
       phpRounded: phpsRounded[i],
       share: (sources[i] / income) * 100,
+      shareRounded: sharesRounded[i],
     })),
     percentSum,
     fixedSource,

@@ -374,111 +374,256 @@ a:hover {
   border: 0;
 }
 
-/* ---- converter ------------------------------------------------------------ */
-.convert__input {
+/* ---- budget split ---------------------------------------------------------------
+   Top strip with income, currency and rate. Then a stacked bar, then one
+   line per row. Each row has its inputs on the left and its answer on the
+   right, so the numbers can be read down one column. */
+.field {
   display: flex;
-  gap: 0.7rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.field__label {
+  display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  margin: 1.1rem 0 1.2rem;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
-.convert__field {
-  flex: 1;
-  min-width: 160px;
+.field__tag {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--paper);
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
-.convert__field input {
+.field__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.field input,
+.brow input,
+.brow select {
+  min-width: 0;
   width: 100%;
-  padding: 0.6rem 0.8rem;
+  padding: 0.5rem 0.7rem;
   border-radius: 9px;
   border: 1px solid var(--rule);
   background: var(--paper);
   font-family: var(--mono);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
-.convert__field input:focus {
+.field input:focus,
+.brow input:focus,
+.brow select:focus {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
 }
 
-.convert__headline {
-  margin: 0 0 1.3rem;
-  font-size: 1.15rem;
-  line-height: 1.5;
-  font-family: var(--mono);
-}
-
-.convert__headline strong {
-  font-size: 1.7rem;
-  font-weight: 600;
-}
-
-.convert__hint {
+.linkbtn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.8rem;
   color: var(--ink-soft);
-  font-size: 0.88rem;
-  margin: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
 }
 
-.convert__range {
+.linkbtn:hover {
+  color: var(--ink);
+}
+
+.budget__top {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 0.8rem;
-  align-items: center;
-  margin-bottom: 1rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.1rem;
 }
 
-.convert__end {
+.sbar {
+  display: flex;
+  height: 14px;
+  gap: 2px;
+  margin-bottom: 1rem;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.sbar__seg {
+  flex-basis: 0;
+  min-width: 3px;
+}
+
+.sbar__seg--free {
+  background: repeating-linear-gradient(45deg, var(--rule), var(--rule) 4px, var(--paper) 4px, var(--paper) 8px);
+}
+
+.brows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.brow {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1.2fr) auto minmax(0, 1.1fr) minmax(0, 1.2fr) 28px;
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.brow:first-child {
+  border-top: none;
+}
+
+.brow__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--c);
+}
+
+.brow__mode {
+  display: flex;
+  gap: 2px;
+  background: var(--paper);
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.brow__opt {
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 0.3rem 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+}
+
+.brow__opt--on {
+  background: var(--ink);
+  color: #FFFFFF;
+}
+
+.brow__value {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.brow__value select {
+  flex: none;
+  width: auto;
+  min-width: 5.4rem;
+  padding: 0.5rem 0.4rem;
+}
+
+.brow__unit {
+  font-family: var(--mono);
+  color: var(--ink-soft);
+}
+
+.brow__out {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-end;
+  gap: 1px;
+  font-variant-numeric: tabular-nums;
 }
 
-.convert__end--right {
-  text-align: right;
-}
-
-.convert__label {
-  font-size: 0.66rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.brow__php {
   font-family: var(--mono);
-}
-
-.convert__num {
-  font-family: var(--mono);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
-.convert__bar {
-  position: relative;
-  height: 5px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--down), var(--rule), var(--up));
-}
-
-.convert__marker {
-  position: absolute;
-  top: 50%;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--ink);
-  border: 2.5px solid var(--card);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 1px 5px rgba(22, 35, 46, 0.35);
-}
-
-.convert__note {
-  margin: 0;
+.brow__src {
+  font-family: var(--mono);
+  font-size: 0.7rem;
   color: var(--ink-soft);
-  font-size: 0.86rem;
-  line-height: 1.65;
+}
+
+.brow__remove {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  border-radius: 6px;
+  height: 28px;
+}
+
+.brow__remove:hover:not(:disabled) {
+  color: var(--down);
+}
+
+.brow__remove:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.budget__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+
+.addbtn {
+  border: 1px dashed var(--ink-soft);
+  background: none;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.addbtn:hover:not(:disabled) {
+  background: var(--paper);
+}
+
+.addbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.budget__msg {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.budget__note {
+  margin-top: 1rem;
+  line-height: 1.6;
 }
 
 /* ---- who it is for -------------------------------------------------------- */
@@ -852,14 +997,29 @@ a:hover {
     height: 260px;
   }
 
-  .convert__range {
-    grid-template-columns: 1fr 1fr;
-    row-gap: 0.7rem;
+  .budget__top {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .convert__bar {
-    grid-column: 1 / -1;
-    order: 3;
+  .brow {
+    grid-template-columns: 10px minmax(0, 1fr) 28px;
+    row-gap: 0.5rem;
+  }
+
+  .brow__mode,
+  .brow__value {
+    grid-column: 2;
+  }
+
+  .brow__mode {
+    justify-self: start;
+  }
+
+  .brow__out {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
   }
 
   .cov {

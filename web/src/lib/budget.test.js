@@ -4,7 +4,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { computeBudget, parseAmount, roundShares, makeRow } from './budget.js';
+import { computeBudget, parseAmount, roundShares, makeRow, switchKind } from './budget.js';
 
 const close = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, msg ?? `${a} is not close to ${b}`);
 
@@ -141,6 +141,16 @@ test('rounded pesos add up to the rounded total', () => {
   assert.equal(sum, Math.round(out.assignedPhp));
 });
 
+test('shown percents add up to 100 when everything is assigned', () => {
+  const rows = [
+    { id: 'a', label: 'A', mode: 'fixed', value: '500', unit: 'source' },
+    { id: 'b', label: 'B', mode: 'percent', value: '30', unit: 'source' },
+    { id: 'c', label: 'C', mode: 'percent', value: '10', unit: 'source' },
+  ];
+  const out = computeBudget({ total: '1000', rate: 60, rows });
+  assert.deepEqual(out.rows.map((row) => row.shareRounded), [50, 38, 12]);
+});
+
 test('roundShares keeps the sum and handles cents', () => {
   const out = roundShares([10.004, 10.004, 10.004], 2);
   close(out.reduce((s, v) => s + v, 0), 30.01);
@@ -155,6 +165,47 @@ test('parseAmount reads commas and rejects bad values', () => {
   assert.equal(parseAmount('abc'), 0);
   assert.equal(parseAmount(undefined), 0);
   assert.equal(parseAmount(12), 12);
+});
+
+test('switching a percent row to fixed keeps its current amount', () => {
+  const before = computeBudget({ total: '1000', rate: 60, rows: DEFAULTS });
+  const savings = DEFAULTS[0];
+  const current = byId(before, 'savings');
+
+  const inSource = switchKind(savings, 'source', current);
+  assert.deepEqual([inSource.mode, inSource.unit, inSource.value], ['fixed', 'source', '600']);
+
+  const inPesos = switchKind(savings, 'php', current);
+  assert.deepEqual([inPesos.mode, inPesos.unit, inPesos.value], ['fixed', 'php', '36000']);
+
+  // The split stays the same after the switch.
+  const rows = [inSource, DEFAULTS[1], DEFAULTS[2]];
+  const after = computeBudget({ total: '1000', rate: 60, rows });
+  close(byId(after, 'needs').source, 300);
+  close(byId(after, 'wants').source, 100);
+});
+
+test('switching a fixed row to percent fills in its share of the income', () => {
+  const rows = [
+    { id: 'savings', label: 'Savings', mode: 'fixed', value: '500', unit: 'source' },
+    DEFAULTS[1],
+    DEFAULTS[2],
+  ];
+  const before = computeBudget({ total: '1000', rate: 60, rows });
+  const out = switchKind(rows[0], 'percent', byId(before, 'savings'));
+  assert.deepEqual([out.mode, out.value], ['percent', '50']);
+});
+
+test('switching to the kind a row already has changes nothing', () => {
+  const before = computeBudget({ total: '1000', rate: 60, rows: DEFAULTS });
+  const out = switchKind(DEFAULTS[1], 'percent', byId(before, 'needs'));
+  assert.equal(out, DEFAULTS[1]);
+});
+
+test('switching a row with a zero amount leaves its box empty', () => {
+  const before = computeBudget({ total: '', rate: 60, rows: DEFAULTS });
+  const out = switchKind(DEFAULTS[2], 'php', byId(before, 'wants'));
+  assert.equal(out.value, '');
 });
 
 test('makeRow gives each row its own id', () => {
