@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/lib/budget.test.js src/lib/budgetStorage.test.js src/lib/format.test.js"
+    "test": "node --test src/lib/budget.test.js src/lib/budgetStorage.test.js src/lib/format.test.js src/lib/split.test.js"
   },
   "dependencies": {
     "react": "^18.3.1",
