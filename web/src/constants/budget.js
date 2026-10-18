@@ -15,6 +15,15 @@ export const DEFAULT_ROWS = [
   { id: 'wants', label: 'Wants', unit: 'percent', value: '10' },
 ];
 
+// Ready made splits. Each one adds up to 100 percent. The first is the
+// starting split. Picking one replaces the rows and keeps income and currency.
+export const PRESETS = [
+  { id: 'savings-first', name: '60 / 30 / 10', rows: [['Savings', 60], ['Needs', 30], ['Wants', 10]] },
+  { id: 'fifty-thirty-twenty', name: '50 / 30 / 20', rows: [['Needs', 50], ['Wants', 30], ['Savings', 20]] },
+  { id: 'seventy-twenty-ten', name: '70 / 20 / 10', rows: [['Needs', 70], ['Savings', 20], ['Wants', 10]] },
+  { id: 'eighty-twenty', name: '80 / 20', rows: [['Spending', 80], ['Savings', 20]] },
+];
+
 export const UNITS = ['percent', 'source', 'php'];
 
 // Keeps the list short enough to read at a glance.

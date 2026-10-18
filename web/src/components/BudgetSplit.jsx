@@ -24,6 +24,7 @@ import { formatMoney, formatPeso } from '../lib/format';
 import { loadSettings, saveSettings, clearSettings } from '../lib/budgetStorage';
 import BudgetRow from './BudgetRow';
 import BudgetNotice from './BudgetNotice';
+import BudgetPresets from './BudgetPresets';
 import BudgetReport, { printReport } from './BudgetReport';
 
 export default function BudgetSplit({ series, latest, lastDate }) {
@@ -57,6 +58,13 @@ export default function BudgetSplit({ series, latest, lastDate }) {
   const changeRow = (id, patch) => update({ rows: applyEdit(rows, id, patch, balanceId) });
   const removeRow = (id) => update({ rows: rows.filter((r) => r.id !== id) });
   const addRow = () => update({ rows: [...rows, makeRow()] });
+
+  function pickPreset(preset) {
+    setBalanceId(null);
+    update({
+      rows: preset.rows.map(([label, value]) => makeRow({ label, unit: 'percent', value: String(value) })),
+    });
+  }
 
   function chooseCurrency(c) {
     setRateText(null);
@@ -185,6 +193,8 @@ export default function BudgetSplit({ series, latest, lastDate }) {
           {showLeft && <span className="sbar__seg sbar__seg--free" style={{ flexGrow: result.left }} />}
         </div>
       )}
+
+      <BudgetPresets rows={rows} onPick={pickPreset} />
 
       <p className="budget__hint">Leave a row empty and it fills itself. Change a row and the auto row adjusts.</p>
 
