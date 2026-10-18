@@ -179,7 +179,6 @@ export default function BudgetSplit({ series, latest }) {
             currency={currency}
             color={colorOf(i)}
             canRemove={rows.length > 1}
-            canConvert={ready}
             onChange={(patch) => changeRow(row.id, patch)}
             onRemove={() => removeRow(row.id)}
           />

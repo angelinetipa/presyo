@@ -15,16 +15,17 @@
 // browser from dropping that selection right after the click. Clearing
 // the field makes the row auto again.
 //
+// Changing the unit changes the label only. The typed number stays as it is.
+//
 // The row only reports edits through onChange. The maths is in lib/split.js.
 
 import { useEffect, useRef } from 'react';
 import { MAX_LABEL, UNITS } from '../constants/budget';
 import { formatMoney, formatPeso } from '../lib/format';
-import { formatValue } from '../lib/split';
 
 const UNIT_NAME = { percent: '%', php: 'PHP' };
 
-export default function BudgetRow({ row, result, currency, color, canRemove, canConvert, onChange, onRemove }) {
+export default function BudgetRow({ row, result, currency, color, canRemove, onChange, onRemove }) {
   const auto = result.state === 'auto';
   const empty = result.state === 'empty';
   const invalid = result.state === 'invalid';
@@ -39,18 +40,6 @@ export default function BudgetRow({ row, result, currency, color, canRemove, can
   }, [auto, result.autoText]);
 
   const unitName = (u) => UNIT_NAME[u] ?? currency;
-
-  // Changing the unit keeps the amount the same, so the row does not jump.
-  // It only converts when the row has a usable amount to convert.
-  function changeUnit(unit) {
-    if (unit === row.unit) return;
-    if (canConvert && result.state === 'filled') {
-      const next = unit === 'percent' ? result.share : unit === 'php' ? result.php : result.source;
-      onChange({ unit, value: formatValue(next) });
-    } else {
-      onChange({ unit });
-    }
-  }
 
   return (
     <li className={`brow brow--${result.state}`} style={{ '--c': color }}>
@@ -86,7 +75,7 @@ export default function BudgetRow({ row, result, currency, color, canRemove, can
         <select
           value={row.unit}
           aria-label={`Unit for ${name}`}
-          onChange={(e) => changeUnit(e.target.value)}
+          onChange={(e) => onChange({ unit: e.target.value })}
         >
           {UNITS.map((u) => (
             <option key={u} value={u}>{unitName(u)}</option>
