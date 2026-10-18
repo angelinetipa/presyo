@@ -6,13 +6,15 @@
 //   'percent'  a share of the income
 //   'source'   an amount in the income currency
 //   'php'      an amount in pesos
+//
+// A row can be locked. Auto balance never changes a locked row.
 
 export const DEFAULT_INCOME = '1000';
 
 export const DEFAULT_ROWS = [
-  { id: 'savings', label: 'Savings', unit: 'percent', value: '60' },
-  { id: 'needs', label: 'Needs', unit: 'percent', value: '30' },
-  { id: 'wants', label: 'Wants', unit: 'percent', value: '10' },
+  { id: 'savings', label: 'Savings', unit: 'percent', value: '60', locked: false },
+  { id: 'needs', label: 'Needs', unit: 'percent', value: '30', locked: false },
+  { id: 'wants', label: 'Wants', unit: 'percent', value: '10', locked: false },
 ];
 
 // Ready made splits. Each one adds up to 100 percent. The first is the

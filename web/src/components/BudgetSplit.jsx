@@ -69,7 +69,7 @@ export default function BudgetSplit({ series, latest, lastDate }) {
 
   function changeRow(id, patch) {
     const next = rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
-    const touchesAmount = 'value' in patch || 'unit' in patch;
+    const touchesAmount = 'value' in patch || 'unit' in patch;  // a lock or a name cannot break the total
     update({ rows: touchesAmount ? keepBalanced(next, {}, id) : next });
   }
 
@@ -226,7 +226,7 @@ export default function BudgetSplit({ series, latest, lastDate }) {
 
       <BudgetPresets rows={rows} onPick={pickPreset} />
 
-      <p className="budget__hint">Leave a row empty and it fills itself. Change a row and the auto row adjusts.</p>
+      <p className="budget__hint">Leave a row empty and it fills itself. Change a row and another adjusts. Lock a row to stop that.</p>
 
       <ul className="brows">
         {rows.map((row, i) => (

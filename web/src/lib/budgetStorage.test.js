@@ -20,8 +20,8 @@ test('good saved settings come back unchanged', () => {
     currency: 'SGD',
     income: '2500',
     rows: [
-      { id: 'a', label: 'Rent', unit: 'php', value: '9000' },
-      { id: 'b', label: 'Rest', unit: 'percent', value: '' },
+      { id: 'a', label: 'Rent', unit: 'php', value: '9000', locked: true },
+      { id: 'b', label: 'Rest', unit: 'percent', value: '', locked: false },
     ],
   };
   assert.deepEqual(sanitize(saved, VALID, 'USD'), saved);
@@ -43,9 +43,9 @@ test('rows saved by the earlier version are converted to one unit', () => {
     ],
   };
   assert.deepEqual(sanitize(saved, VALID, 'USD').rows, [
-    { id: 'a', label: 'Rent', unit: 'source', value: '300' },
-    { id: 'b', label: 'Phone', unit: 'php', value: '1500' },
-    { id: 'c', label: 'Rest', unit: 'percent', value: '100' },
+    { id: 'a', label: 'Rent', unit: 'source', value: '300', locked: false },
+    { id: 'b', label: 'Phone', unit: 'php', value: '1500', locked: false },
+    { id: 'c', label: 'Rest', unit: 'percent', value: '100', locked: false },
   ]);
 });
 
@@ -65,7 +65,17 @@ test('wrong types are repaired', () => {
     'USD',
   );
   assert.equal(out.income, '1500');
-  assert.deepEqual(out.rows, [{ id: 'a', label: '', unit: 'percent', value: '20' }]);
+  assert.deepEqual(out.rows, [{ id: 'a', label: '', unit: 'percent', value: '20', locked: false }]);
+});
+
+test('only a real true keeps a row locked', () => {
+  const rows = [
+    { id: 'a', label: 'A', unit: 'percent', value: '1', locked: true },
+    { id: 'b', label: 'B', unit: 'percent', value: '2', locked: 'yes' },
+    { id: 'c', label: 'C', unit: 'percent', value: '3' },
+  ];
+  const out = sanitize({ currency: 'USD', income: '10', rows }, VALID, 'USD');
+  assert.deepEqual(out.rows.map((r) => r.locked), [true, false, false]);
 });
 
 test('duplicate row ids fall back to the default rows', () => {

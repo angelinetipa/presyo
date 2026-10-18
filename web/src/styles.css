@@ -589,8 +589,8 @@ a:hover {
 
 .brow {
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr) minmax(0, 11.5rem) minmax(0, 1fr) 28px;
-  grid-template-areas: "dot name value out rm";
+  grid-template-columns: 10px minmax(0, 1fr) minmax(0, 11.5rem) minmax(0, 1fr) 28px 28px;
+  grid-template-areas: "dot name value out lock rm";
   gap: 0.7rem;
   align-items: center;
   padding: 0.55rem 0;
@@ -676,6 +676,35 @@ a:hover {
 
 .brow--invalid .joined {
   border-color: #B23A2B;
+}
+
+.brow__lock {
+  grid-area: lock;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.brow__lock:hover,
+.brow__lock--on {
+  opacity: 1;
+  color: var(--ink);
+}
+
+.brow__lock--on {
+  background: var(--paper);
+}
+
+.brow__lock:focus-visible,
+.brow__remove:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
 }
 
 .brow__remove {
@@ -1149,10 +1178,10 @@ a:hover {
   }
 
   .brow {
-    grid-template-columns: 10px minmax(0, 1.15fr) minmax(0, 1fr) 28px;
+    grid-template-columns: 10px minmax(0, 1.15fr) minmax(0, 1fr) 28px 28px;
     grid-template-areas:
-      "dot name  name rm"
-      "dot value out  out";
+      "dot name  name lock rm"
+      "dot value out  out  out";
     gap: 0.45rem 0.6rem;
     padding: 0.7rem 0;
   }

@@ -15,6 +15,9 @@
 // browser from dropping that selection right after the click. Clearing
 // the field makes the row auto again.
 //
+// A locked row is never changed by auto balance. It can still be edited by
+// hand. Locking an auto row keeps the number it shows.
+//
 // Changing the unit changes the label only. The typed number stays as it is.
 //
 // The row only reports edits through onChange. The maths is in lib/split.js.
@@ -38,6 +41,12 @@ export default function BudgetRow({ row, result, currency, color, canRemove, onC
     const el = valueRef.current;
     if (auto && el && document.activeElement === el) el.select();
   }, [auto, result.autoText]);
+
+  // Locking an auto row freezes the number it shows, so the row keeps it.
+  function toggleLock() {
+    if (!row.locked && auto) onChange({ locked: true, value: result.autoText });
+    else onChange({ locked: !row.locked });
+  }
 
   const unitName = (u) => UNIT_NAME[u] ?? currency;
 
@@ -98,6 +107,23 @@ export default function BudgetRow({ row, result, currency, color, canRemove, onC
         {empty && <span className="brow__soft">Waiting for a value</span>}
         {invalid && <span className="brow__bad">Numbers only</span>}
       </div>
+
+      <button
+        type="button"
+        className={`brow__lock${row.locked ? ' brow__lock--on' : ''}`}
+        aria-pressed={!!row.locked}
+        aria-label={row.locked ? `Unlock ${name}` : `Lock ${name}`}
+        title={row.locked ? 'Locked. Auto balance will not change this row.' : 'Lock this row'}
+        onClick={toggleLock}
+      >
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          {row.locked ? (
+            <path d="M5 7V5a3 3 0 0 1 6 0v2h1a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1Zm1.5 0h3V5a1.5 1.5 0 0 0-3 0v2Z" fill="currentColor" />
+          ) : (
+            <path d="M5 7V5a3 3 0 0 1 5.8-1.1l-1.4.5A1.5 1.5 0 0 0 6.5 5v2H12a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1Z" fill="currentColor" />
+          )}
+        </svg>
+      </button>
 
       <button
         type="button"

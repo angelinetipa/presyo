@@ -78,7 +78,7 @@ let counter = 0;
 /** Makes a new empty row with a unique id. */
 export function makeRow({ label = '', unit = 'percent', value = '' } = {}) {
   counter += 1;
-  return { id: `row-${Date.now().toString(36)}-${counter}`, label, unit, value };
+  return { id: `row-${Date.now().toString(36)}-${counter}`, label, unit, value, locked: false };
 }
 
 function baseResult(status, income, rate, items) {
@@ -234,8 +234,9 @@ export function computeSplit({ total, rate, rows }) {
  * Which row is emptied:
  *   1. the balancing row, which is the one that last filled itself
  *   2. otherwise the last row
- * It is never the row the person just edited. If that row is the balancing
- * row, the last other row is used instead.
+ * It is never the row the person just edited, and never a locked row. If
+ * the balancing row is not allowed, the last row that is allowed is used.
+ * When every other row is locked, nothing is emptied.
  *
  * Nothing changes when a row is already empty (it is filling itself), when
  * a value is not a number, when there is no income or rate, or when the
@@ -248,8 +249,8 @@ export function rebalance({ rows, total, rate, editedId = null, balanceId = null
   const { status } = computeSplit({ total, rate, rows });
   if (status !== 'over' && status !== 'under') return rows;
 
-  const target = rows.find((r) => r.id === balanceId && r.id !== editedId)
-    ?? [...rows].reverse().find((r) => r.id !== editedId);
+  const allowed = rows.filter((r) => r.id !== editedId && !r.locked);
+  const target = allowed.find((r) => r.id === balanceId) ?? allowed[allowed.length - 1];
   if (!target) return rows;
 
   return rows.map((r) => (r.id === target.id ? { ...r, value: '' } : r));

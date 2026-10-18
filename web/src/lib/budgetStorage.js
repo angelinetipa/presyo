@@ -33,6 +33,7 @@ function cleanRow(row, index) {
     label: typeof row.label === 'string' ? row.label.slice(0, MAX_LABEL) : '',
     unit: readUnit(row),
     value: asText(row.value).slice(0, 20),
+    locked: row.locked === true,
   };
 }
 

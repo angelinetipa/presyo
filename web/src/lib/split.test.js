@@ -279,3 +279,22 @@ test('a change to income or rate with fixed amounts rebalances', () => {
 test('a single row never empties itself', () => {
   assert.equal(vals(bal([row('a', 'percent', '60')], { editedId: 'a' })), '60');
 });
+
+test('a locked row is never emptied', () => {
+  const rows = three().map((r) => (r.id === 'a' ? { ...r, value: '70' } : r.id === 'c' ? { ...r, locked: true } : r));
+  // c is the balancing row but it is locked, so b is emptied instead.
+  const next = bal(rows, { editedId: 'a', balanceId: 'c' });
+  assert.equal(vals(next), '70,,10');
+  close(byId(run(next), 'b').share, 20);
+});
+
+test('when every other row is locked nothing is emptied', () => {
+  const rows = three().map((r) => (r.id === 'a' ? { ...r, value: '70' } : { ...r, locked: true }));
+  const next = bal(rows, { editedId: 'a' });
+  assert.equal(vals(next), '70,30,10');
+  assert.equal(run(next).status, 'over');
+});
+
+test('makeRow starts unlocked', () => {
+  assert.equal(makeRow().locked, false);
+});
