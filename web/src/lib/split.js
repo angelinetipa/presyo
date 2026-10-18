@@ -225,27 +225,32 @@ export function computeSplit({ total, rate, rows }) {
 }
 
 /**
- * Applies one edit to the rows and keeps the split balanced.
+ * Keeps the split adding up after a change.
  *
- * When every row has a value and the user changes one of them, the
- * balancing row is emptied so it fills itself with what is left. The
- * balancing row is the one that last filled itself. If none did yet,
- * it is the last row.
+ * Call it with the rows as they are AFTER the change. When every row has
+ * a value and the total is over or under, one row is emptied so it fills
+ * itself with what is left.
  *
- * Nothing is balanced when the edited row is the balancing row, when the
- * edit is only a name, when the new value is empty, or when some row was
- * already empty (that row is already filling itself).
+ * Which row is emptied:
+ *   1. the balancing row, which is the one that last filled itself
+ *   2. otherwise the last row
+ * It is never the row the person just edited. If that row is the balancing
+ * row, the last other row is used instead.
+ *
+ * Nothing changes when a row is already empty (it is filling itself), when
+ * a value is not a number, when there is no income or rate, or when the
+ * rows already add up.
  */
-export function applyEdit(rows, id, patch, balanceId) {
-  const next = rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
+export function rebalance({ rows, total, rate, editedId = null, balanceId = null }) {
+  if (rows.length < 2) return rows;
+  if (rows.some((r) => String(r.value).trim() === '')) return rows;
 
-  const touchesAmount = 'value' in patch || 'unit' in patch;
-  if (!touchesAmount) return next;
-  if ('value' in patch && String(patch.value).trim() === '') return next;
-  if (rows.some((r) => String(r.value).trim() === '')) return next;
+  const { status } = computeSplit({ total, rate, rows });
+  if (status !== 'over' && status !== 'under') return rows;
 
-  const target = rows.find((r) => r.id === balanceId) ?? rows[rows.length - 1];
-  if (!target || target.id === id) return next;
+  const target = rows.find((r) => r.id === balanceId && r.id !== editedId)
+    ?? [...rows].reverse().find((r) => r.id !== editedId);
+  if (!target) return rows;
 
-  return next.map((r) => (r.id === target.id ? { ...r, value: '' } : r));
+  return rows.map((r) => (r.id === target.id ? { ...r, value: '' } : r));
 }

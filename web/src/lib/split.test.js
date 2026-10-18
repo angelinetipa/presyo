@@ -4,7 +4,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { computeSplit, parseAmount, formatValue, roundShares, makeRow, applyEdit } from './split.js';
+import { computeSplit, parseAmount, formatValue, roundShares, makeRow, rebalance } from './split.js';
 
 const close = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, msg ?? `${a} is not close to ${b}`);
 const row = (id, unit, value) => ({ id, label: id, unit, value });
@@ -218,44 +218,64 @@ test('makeRow gives each row its own id and starts empty', () => {
   assert.equal(a.value, '');
 });
 
-test('editing a row empties the balancing row so it can fill itself', () => {
-  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
-  const next = applyEdit(rows, 'a', { value: '70' }, 'c');
-  assert.equal(next[0].value, '70');
-  assert.equal(next[2].value, '');
+const three = () => [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+const bal = (rows, extra = {}) => rebalance({ rows, total: '1000', rate: 60, ...extra });
+const vals = (rows) => rows.map((r) => r.value).join();
+
+test('an edit that goes over empties the balancing row', () => {
+  const rows = three().map((r) => (r.id === 'a' ? { ...r, value: '70' } : r));
+  const next = bal(rows, { editedId: 'a', balanceId: 'c' });
+  assert.equal(vals(next), '70,30,');
   const r = run(next);
   assert.equal(r.status, 'complete');
   close(byId(r, 'c').share, 0);
 });
 
-test('with no balancing row chosen yet, the last row balances', () => {
-  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
-  const next = applyEdit(rows, 'b', { value: '20' }, undefined);
-  assert.equal(next[2].value, '');
+test('an edit that goes under empties the balancing row', () => {
+  const rows = three().map((r) => (r.id === 'b' ? { ...r, value: '20' } : r));
+  const next = bal(rows, { editedId: 'b', balanceId: 'c' });
   close(byId(run(next), 'c').share, 20);
 });
 
-test('editing the balancing row itself changes nothing else', () => {
-  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
-  const next = applyEdit(rows, 'c', { value: '5' }, 'c');
-  assert.deepEqual(next.map((r) => r.value), ['60', '30', '5']);
+test('with no balancing row yet, the last row balances', () => {
+  const rows = three().map((r) => (r.id === 'a' ? { ...r, value: '50' } : r));
+  assert.equal(vals(bal(rows, { editedId: 'a' })), '50,30,');
 });
 
-test('names, empty values and already empty rows are left alone', () => {
-  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
-  assert.deepEqual(applyEdit(rows, 'a', { label: 'Rent' }, 'c').map((r) => r.value), ['60', '30', '10']);
-  assert.deepEqual(applyEdit(rows, 'a', { value: '' }, 'c').map((r) => r.value), ['', '30', '10']);
+test('typing into the balancing row empties another row instead', () => {
+  const rows = three().map((r) => (r.id === 'c' ? { ...r, value: '5' } : r));
+  const next = bal(rows, { editedId: 'c', balanceId: 'c' });
+  assert.equal(vals(next), '60,,5');
+  close(byId(run(next), 'b').share, 35);
+});
+
+test('a row cleared and then typed in again still balances', () => {
+  // The edited row had no value a moment ago. After typing it has one.
+  const rows = three().map((r) => (r.id === 'a' ? { ...r, value: '7' } : r));
+  const next = bal(rows, { editedId: 'a', balanceId: 'c' });
+  assert.equal(vals(next), '7,30,');
+});
+
+test('rows that already add up are left alone', () => {
+  assert.equal(vals(bal(three(), { editedId: 'a', balanceId: 'c' })), '60,30,10');
+});
+
+test('an empty row, a bad number or a missing rate change nothing', () => {
   const gap = [row('a', 'percent', '60'), row('b', 'percent', ''), row('c', 'percent', '10')];
-  assert.deepEqual(applyEdit(gap, 'a', { value: '50' }, 'c').map((r) => r.value), ['50', '', '10']);
+  assert.equal(vals(bal(gap, { editedId: 'a', balanceId: 'c' })), '60,,10');
+  const bad = three().map((r) => (r.id === 'a' ? { ...r, value: 'abc' } : r));
+  assert.equal(vals(bal(bad, { editedId: 'a' })), 'abc,30,10');
+  const noRate = [row('a', 'percent', '70'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+  assert.equal(vals(rebalance({ rows: noRate, total: '1000', rate: 0 })), '70,30,10');
 });
 
-test('a unit change on another row also rebalances', () => {
-  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
-  const next = applyEdit(rows, 'a', { unit: 'source' }, 'c');
-  assert.equal(next[2].value, '');
+test('a change to income or rate with fixed amounts rebalances', () => {
+  const rows = [row('a', 'source', '500'), row('b', 'source', '300'), row('c', 'source', '200')];
+  const next = rebalance({ rows, total: '1200', rate: 60, balanceId: 'c' });
+  assert.equal(vals(next), '500,300,');
+  close(byId(run(next, '1200'), 'c').source, 400);
 });
 
 test('a single row never empties itself', () => {
-  const rows = [row('a', 'percent', '60')];
-  assert.equal(applyEdit(rows, 'a', { value: '50' }, 'a')[0].value, '50');
+  assert.equal(vals(bal([row('a', 'percent', '60')], { editedId: 'a' })), '60');
 });

@@ -7,8 +7,9 @@
 //
 // Each row has one value and one unit (%, the income currency, or pesos).
 // Leave one row empty and it fills itself with what is left. When every row
-// has a value and one is changed, the row that last filled itself (or the
-// last row) fills itself again, so the split keeps adding up.
+// has a value and a change makes the total go over or under (a row, the
+// income, the rate or the currency), the row that last filled itself, or the
+// last row, fills itself again. See rebalance in lib/split.js.
 //
 // Changing the income currency keeps every number as typed. An amount of
 // 300 in the income currency stays 300, and only the label changes.
@@ -19,7 +20,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_INCOME, DEFAULT_ROWS, MAX_ROWS, ROW_COLORS } from '../constants/budget';
 import { rankCurrencies, defaultCurrency } from '../lib/rank';
-import { applyEdit, computeSplit, makeRow, parseAmount } from '../lib/split';
+import { rebalance, computeSplit, makeRow, parseAmount } from '../lib/split';
 import { formatMoney, formatPeso } from '../lib/format';
 import { loadSettings, saveSettings, clearSettings } from '../lib/budgetStorage';
 import BudgetRow from './BudgetRow';
@@ -55,7 +56,36 @@ export default function BudgetSplit({ series, latest, lastDate }) {
   if (available.length === 0) return null;
 
   const update = (patch) => setSettings((s) => ({ ...s, ...patch }));
-  const changeRow = (id, patch) => update({ rows: applyEdit(rows, id, patch, balanceId) });
+
+  // Every change that can break the total goes through rebalance, so the
+  // balancing row refills itself. Name edits cannot change the total.
+  const keepBalanced = (nextRows, next = {}, editedId = null) => rebalance({
+    rows: nextRows,
+    total: next.income ?? income,
+    rate: next.rate ?? rate,
+    editedId,
+    balanceId,
+  });
+
+  function changeRow(id, patch) {
+    const next = rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
+    const touchesAmount = 'value' in patch || 'unit' in patch;
+    update({ rows: touchesAmount ? keepBalanced(next, {}, id) : next });
+  }
+
+  function changeIncome(text) {
+    update({ income: text, rows: keepBalanced(rows, { income: text }) });
+  }
+
+  function changeRate(text) {
+    setRateText(text);
+    update({ rows: keepBalanced(rows, { rate: parseAmount(text) }) });
+  }
+
+  function useToday() {
+    setRateText(null);
+    update({ rows: keepBalanced(rows, { rate: today }) });
+  }
   const removeRow = (id) => update({ rows: rows.filter((r) => r.id !== id) });
   const addRow = () => update({ rows: [...rows, makeRow()] });
 
@@ -68,7 +98,7 @@ export default function BudgetSplit({ series, latest, lastDate }) {
 
   function chooseCurrency(c) {
     setRateText(null);
-    update({ currency: c });
+    update({ currency: c, rows: keepBalanced(rows, { rate: latest[c]?.value ?? 0 }) });
   }
 
   function resetAll() {
@@ -134,7 +164,7 @@ export default function BudgetSplit({ series, latest, lastDate }) {
               inputMode="decimal"
               value={income}
               placeholder="0"
-              onChange={(e) => update({ income: e.target.value })}
+              onChange={(e) => changeIncome(e.target.value)}
             />
             <select
               value={currency}
@@ -160,10 +190,10 @@ export default function BudgetSplit({ series, latest, lastDate }) {
               type="text"
               inputMode="decimal"
               value={rateShown}
-              onChange={(e) => setRateText(e.target.value)}
+              onChange={(e) => changeRate(e.target.value)}
             />
             {edited && (
-              <button type="button" className="linkbtn" onClick={() => setRateText(null)}>
+              <button type="button" className="linkbtn" onClick={useToday}>
                 Use today
               </button>
             )}
