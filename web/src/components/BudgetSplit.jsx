@@ -24,8 +24,9 @@ import { formatMoney, formatPeso } from '../lib/format';
 import { loadSettings, saveSettings, clearSettings } from '../lib/budgetStorage';
 import BudgetRow from './BudgetRow';
 import BudgetNotice from './BudgetNotice';
+import BudgetReport, { printReport } from './BudgetReport';
 
-export default function BudgetSplit({ series, latest }) {
+export default function BudgetSplit({ series, latest, lastDate }) {
   const available = rankCurrencies(latest);
   const fallback = defaultCurrency(latest);
 
@@ -100,9 +101,19 @@ export default function BudgetSplit({ series, latest }) {
               : 'Set your income and divide it. Everything here can be changed.'}
           </p>
         </div>
-        <button type="button" className="linkbtn" onClick={resetAll}>
-          Reset to defaults
-        </button>
+        <div className="panel__actions">
+          <button
+            type="button"
+            className="linkbtn"
+            onClick={() => printReport(lastDate)}
+            disabled={!ready}
+          >
+            Save as PDF
+          </button>
+          <button type="button" className="linkbtn" onClick={resetAll}>
+            Reset to defaults
+          </button>
+        </div>
       </div>
 
       <div className="budget__top">
@@ -205,6 +216,20 @@ export default function BudgetSplit({ series, latest }) {
           {formatPeso(incomeNum * low)} to {formatPeso(incomeNum * high)}. That is what did happen,
           not a forecast.
         </p>
+      )}
+
+      {ready && (
+        <BudgetReport
+          result={result}
+          rows={rows}
+          currency={currency}
+          rate={rate}
+          rateEdited={edited}
+          rateDate={lastDate}
+          low={low}
+          high={high}
+          days={history.length}
+        />
       )}
     </section>
   );

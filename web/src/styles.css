@@ -1163,3 +1163,169 @@ a:hover {
     transition: none !important;
   }
 }
+
+/* ---- printed summary ----------------------------------------------------------
+   The report is rendered into document.body next to the app root. It is
+   hidden on screen. When printing, the app root is hidden and only the
+   report is shown. */
+.panel__actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.linkbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.report {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
+  html,
+  body {
+    background: #FFFFFF;
+  }
+
+  #root {
+    display: none;
+  }
+
+  .report {
+    display: block;
+    color: #16232E;
+    font-family: var(--sans);
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+
+  .report__head {
+    border-bottom: 2px solid #16232E;
+    padding-bottom: 8pt;
+    margin-bottom: 14pt;
+  }
+
+  .report__brand {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 9pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .report__title {
+    margin: 2pt 0 0;
+    font-size: 22pt;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .report__meta {
+    margin: 2pt 0 0;
+    color: #5E6C77;
+    font-size: 9.5pt;
+  }
+
+  .report__facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10pt;
+    margin: 0 0 16pt;
+  }
+
+  .report__facts div {
+    border: 1px solid #DDDCD6;
+    border-radius: 6pt;
+    padding: 7pt 9pt;
+  }
+
+  .report__facts dt {
+    font-family: var(--mono);
+    font-size: 8pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5E6C77;
+  }
+
+  .report__facts dd {
+    margin: 2pt 0 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 10.5pt;
+  }
+
+  .report__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12pt;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .report__table th,
+  .report__table td {
+    padding: 6pt 6pt;
+    text-align: left;
+    border-bottom: 1px solid #DDDCD6;
+  }
+
+  .report__table th {
+    font-family: var(--mono);
+    font-size: 8pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5E6C77;
+    border-bottom: 1px solid #16232E;
+  }
+
+  .report__table .num {
+    text-align: right;
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+
+  .report__table tfoot td {
+    font-weight: 600;
+    border-bottom: none;
+  }
+
+  .report__table tfoot tr:first-child td {
+    border-top: 1px solid #16232E;
+  }
+
+  .report__table tr {
+    break-inside: avoid;
+  }
+
+  .report__status {
+    margin: 0 0 10pt;
+    padding: 7pt 9pt;
+    border-left: 3pt solid #16232E;
+    background: #F1F0EC;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .report__text {
+    margin: 0 0 10pt;
+    color: #5E6C77;
+  }
+
+  .report__foot {
+    margin-top: 18pt;
+    padding-top: 8pt;
+    border-top: 1px solid #DDDCD6;
+    color: #5E6C77;
+    font-size: 8.5pt;
+  }
+
+  .report__foot p {
+    margin: 0 0 3pt;
+  }
+}

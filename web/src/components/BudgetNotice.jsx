@@ -9,7 +9,8 @@ import { formatMoney, formatPeso } from '../lib/format';
 
 const pct = (n) => `${Number(n.toFixed(1))}%`;
 
-function build(result, currency) {
+/** The sentence for a split result. Also used by the printed summary. */
+export function describe(result, currency) {
   const left = `${formatPeso(result.leftPhp)} (${currency} ${formatMoney(result.left)}, ${pct(result.leftShare)})`;
   const names = (ids) => ids
     .map((id) => result.rows.find((r) => r.id === id)?.label || 'a row')
@@ -49,7 +50,7 @@ function build(result, currency) {
 }
 
 export default function BudgetNotice({ result, currency }) {
-  const note = build(result, currency);
+  const note = describe(result, currency);
   if (!note) return null;
   return (
     <p className={`notice notice--${note.tone}`} role="status" aria-live="polite">

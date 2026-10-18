@@ -86,7 +86,7 @@ export default function App() {
           </div>
 
           <div className="dash__wide">
-            <BudgetSplit series={data.series} latest={data.latest} />
+            <BudgetSplit series={data.series} latest={data.latest} lastDate={data.lastDate} />
           </div>
         </div>
       )}
