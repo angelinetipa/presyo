@@ -1,5 +1,7 @@
 // src/lib/format.js
-// Date formatting for plain calendar days such as "2026-10-18".
+// Shared formatting helpers.
+//
+// Dates. These handle plain calendar days such as "2026-10-18".
 //
 // A bare date string is read as midnight UTC. Showing it in the viewer's
 // own time zone can move it back a day for anyone west of UTC. These
@@ -17,4 +19,14 @@ const STYLES = {
 /** Formats a plain day. style is 'short' (Oct 18), 'medium' (Oct 18, 2026) or 'long'. */
 export function formatDay(iso, style = 'short') {
   return new Date(iso).toLocaleDateString('en-PH', { ...STYLES[style], timeZone: 'UTC' });
+}
+
+/** Pesos, whole numbers, with the peso sign. */
+export function formatPeso(n) {
+  return '\u20B1' + n.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+/** An amount with two decimals and thousands separators. */
+export function formatMoney(n) {
+  return n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

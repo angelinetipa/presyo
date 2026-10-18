@@ -7,22 +7,32 @@
 //
 // The saved text is untrusted. It can be old, edited by hand, or cut off,
 // so sanitize checks every field and falls back to the defaults.
+//
+// Earlier versions saved each row as { mode: 'percent' | 'fixed', unit }.
+// Those rows are converted to the single unit used now.
 
-import { DEFAULT_INCOME, DEFAULT_ROWS, MAX_ROWS, MAX_LABEL, STORAGE_KEY } from '../constants/budget.js';
-
-const MODES = ['percent', 'fixed'];
-const UNITS = ['source', 'php'];
+import {
+  DEFAULT_INCOME, DEFAULT_ROWS, MAX_ROWS, MAX_LABEL, STORAGE_KEY, UNITS,
+} from '../constants/budget.js';
 
 const asText = (v) => (typeof v === 'number' && Number.isFinite(v) ? String(v) : typeof v === 'string' ? v : '');
+
+function readUnit(row) {
+  if (row.mode !== undefined) {
+    // Old shape. A fixed row kept its own unit, a percent row was a percent.
+    if (row.mode === 'fixed') return row.unit === 'php' ? 'php' : 'source';
+    return 'percent';
+  }
+  return UNITS.includes(row.unit) ? row.unit : 'percent';
+}
 
 function cleanRow(row, index) {
   if (!row || typeof row !== 'object') return null;
   return {
     id: typeof row.id === 'string' && row.id ? row.id.slice(0, 40) : `saved-${index}`,
     label: typeof row.label === 'string' ? row.label.slice(0, MAX_LABEL) : '',
-    mode: MODES.includes(row.mode) ? row.mode : 'percent',
+    unit: readUnit(row),
     value: asText(row.value).slice(0, 20),
-    unit: UNITS.includes(row.unit) ? row.unit : 'source',
   };
 }
 

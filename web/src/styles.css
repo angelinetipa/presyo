@@ -375,9 +375,12 @@ a:hover {
 }
 
 /* ---- budget split ---------------------------------------------------------------
-   Top strip with income, currency and rate. Then a stacked bar, then one
-   line per row. Each row has its inputs on the left and its answer on the
-   right, so the numbers can be read down one column. */
+   Top strip with income and rate. Then a stacked bar, then one line per
+   row. Each row has its inputs on the left and its answer on the right,
+   so the numbers can be read down one column.
+
+   Inputs are 16px on phones. Smaller text makes iOS zoom the page when
+   an input is focused. */
 .field {
   display: flex;
   flex-direction: column;
@@ -410,26 +413,79 @@ a:hover {
   gap: 0.6rem;
 }
 
-.field input,
-.brow input,
-.brow select {
+.field__input,
+.brow__label,
+.joined {
   min-width: 0;
   width: 100%;
-  padding: 0.5rem 0.7rem;
   border-radius: 9px;
   border: 1px solid var(--rule);
   background: var(--paper);
+  color: var(--ink);
+}
+
+.field__input,
+.brow__label,
+.joined input,
+.joined select {
+  padding: 0.5rem 0.7rem;
   font-family: var(--mono);
   font-size: 0.95rem;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
-.field input:focus,
-.brow input:focus,
-.brow select:focus {
+.field__input,
+.brow__label {
+  min-width: 0;
+  width: 100%;
+}
+
+.brow__label {
+  font-family: var(--sans);
+  font-weight: 500;
+}
+
+/* One control made of a text input and a unit select. */
+.joined {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.joined input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+
+.joined select {
+  flex: none;
+  width: auto;
+  border: none;
+  border-left: 1px solid var(--rule);
+  background: transparent;
+  padding-left: 0.5rem;
+  padding-right: 0.3rem;
+  cursor: pointer;
+}
+
+.field__input:focus,
+.brow__label:focus {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
+}
+
+.joined:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.joined input:focus,
+.joined select:focus {
+  outline: none;
 }
 
 .linkbtn {
@@ -451,17 +507,23 @@ a:hover {
 
 .budget__top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.9rem;
   align-items: end;
   margin-bottom: 1.1rem;
+}
+
+.budget__hint {
+  margin: 0 0 0.3rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
 }
 
 .sbar {
   display: flex;
   height: 14px;
   gap: 2px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
   border-radius: 7px;
   overflow: hidden;
 }
@@ -483,7 +545,8 @@ a:hover {
 
 .brow {
   display: grid;
-  grid-template-columns: 10px minmax(0, 1.2fr) auto minmax(0, 1.1fr) minmax(0, 1.2fr) 28px;
+  grid-template-columns: 10px minmax(0, 1fr) minmax(0, 11.5rem) minmax(0, 1fr) 28px;
+  grid-template-areas: "dot name value out rm";
   gap: 0.7rem;
   align-items: center;
   padding: 0.55rem 0;
@@ -495,65 +558,37 @@ a:hover {
 }
 
 .brow__swatch {
+  grid-area: dot;
   width: 10px;
   height: 10px;
   border-radius: 3px;
   background: var(--c);
 }
 
-.brow__mode {
-  display: flex;
-  gap: 2px;
-  background: var(--paper);
-  padding: 3px;
-  border-radius: 8px;
-}
-
-.brow__opt {
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 5px;
-  padding: 0.3rem 0.55rem;
-  font-family: var(--mono);
-  font-size: 0.74rem;
-  color: var(--ink-soft);
-}
-
-.brow__opt--on {
-  background: var(--ink);
-  color: #FFFFFF;
+.brow__label {
+  grid-area: name;
 }
 
 .brow__value {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.brow__value select {
-  flex: none;
-  width: auto;
-  min-width: 5.4rem;
-  padding: 0.5rem 0.4rem;
-}
-
-.brow__unit {
-  font-family: var(--mono);
-  color: var(--ink-soft);
+  grid-area: value;
 }
 
 .brow__out {
+  grid-area: out;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 1px;
+  min-width: 0;
   font-variant-numeric: tabular-nums;
 }
 
 .brow__php {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: var(--mono);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -561,9 +596,46 @@ a:hover {
   font-family: var(--mono);
   font-size: 0.7rem;
   color: var(--ink-soft);
+  text-align: right;
+}
+
+.brow__tag {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: #F6E2B5;
+  color: #6B4A06;
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.brow__soft,
+.brow__bad {
+  font-size: 0.78rem;
+}
+
+.brow__soft {
+  color: var(--ink-soft);
+}
+
+.brow__bad {
+  color: #B23A2B;
+  font-weight: 600;
+}
+
+/* States. An auto row is tinted so it reads as filled in by the tool. */
+.brow--auto .joined {
+  background: #FBF1D6;
+  border-color: #E8CF8E;
+}
+
+.brow--invalid .joined {
+  border-color: #B23A2B;
 }
 
 .brow__remove {
+  grid-area: rm;
   border: none;
   background: none;
   cursor: pointer;
@@ -585,7 +657,6 @@ a:hover {
 
 .budget__foot {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
@@ -614,11 +685,30 @@ a:hover {
   cursor: not-allowed;
 }
 
-.budget__msg {
+/* The one message under the rows. Colour is never the only signal, the
+   words say the same thing. */
+.notice {
+  flex: 1 1 14rem;
   margin: 0;
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  color: var(--ink-soft);
+  padding: 0.5rem 0.75rem;
+  border-radius: 9px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.notice--ok {
+  background: #E3F3EA;
+  color: #1F5A3C;
+}
+
+.notice--warn {
+  background: #FBF1D6;
+  color: #6B4A06;
+}
+
+.notice--bad {
+  background: #F9E1DC;
+  color: #8E2C1F;
 }
 
 .budget__note {
@@ -1003,29 +1093,28 @@ a:hover {
     height: 260px;
   }
 
-  .budget__top {
-    grid-template-columns: minmax(0, 1fr);
+  .panel {
+    padding: 1.1rem 0.95rem;
+  }
+
+  .field__input,
+  .brow__label,
+  .joined input,
+  .joined select {
+    font-size: 1rem;
   }
 
   .brow {
-    grid-template-columns: 10px minmax(0, 1fr) 28px;
-    row-gap: 0.5rem;
-  }
-
-  .brow__mode,
-  .brow__value {
-    grid-column: 2;
-  }
-
-  .brow__mode {
-    justify-self: start;
+    grid-template-columns: 10px minmax(0, 1.15fr) minmax(0, 1fr) 28px;
+    grid-template-areas:
+      "dot name  name rm"
+      "dot value out  out";
+    gap: 0.45rem 0.6rem;
+    padding: 0.7rem 0;
   }
 
   .brow__out {
-    grid-column: 2;
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
+    align-items: flex-end;
   }
 
   .cov {
@@ -1052,6 +1141,16 @@ a:hover {
   .fold__hint {
     flex-basis: 100%;
     order: 3;
+  }
+}
+
+@media (max-width: 340px) {
+  .budget__top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brow__php {
+    font-size: 1rem;
   }
 }
 

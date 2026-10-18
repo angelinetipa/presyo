@@ -20,42 +20,69 @@ test('good saved settings come back unchanged', () => {
     currency: 'SGD',
     income: '2500',
     rows: [
-      { id: 'a', label: 'Rent', mode: 'fixed', value: '900', unit: 'source' },
-      { id: 'b', label: 'Rest', mode: 'percent', value: '100', unit: 'source' },
+      { id: 'a', label: 'Rent', unit: 'php', value: '9000' },
+      { id: 'b', label: 'Rest', unit: 'percent', value: '' },
     ],
   };
   assert.deepEqual(sanitize(saved, VALID, 'USD'), saved);
+});
+
+test('an empty row value stays empty', () => {
+  const out = sanitize({ currency: 'USD', income: '10', rows: [{ id: 'a', label: 'A', unit: 'source', value: '' }] }, VALID, 'USD');
+  assert.equal(out.rows[0].value, '');
+});
+
+test('rows saved by the earlier version are converted to one unit', () => {
+  const saved = {
+    currency: 'USD',
+    income: '1000',
+    rows: [
+      { id: 'a', label: 'Rent', mode: 'fixed', value: '300', unit: 'source' },
+      { id: 'b', label: 'Phone', mode: 'fixed', value: '1500', unit: 'php' },
+      { id: 'c', label: 'Rest', mode: 'percent', value: '100', unit: 'source' },
+    ],
+  };
+  assert.deepEqual(sanitize(saved, VALID, 'USD').rows, [
+    { id: 'a', label: 'Rent', unit: 'source', value: '300' },
+    { id: 'b', label: 'Phone', unit: 'php', value: '1500' },
+    { id: 'c', label: 'Rest', unit: 'percent', value: '100' },
+  ]);
+});
+
+test('an unknown unit falls back to percent', () => {
+  const out = sanitize({ currency: 'USD', income: '10', rows: [{ id: 'a', label: 'A', unit: 'moon', value: '5' }] }, VALID, 'USD');
+  assert.equal(out.rows[0].unit, 'percent');
 });
 
 test('a currency that is no longer tracked falls back', () => {
   assert.equal(sanitize({ currency: 'XYZ', income: '10', rows: [] }, VALID, 'USD').currency, 'USD');
 });
 
-test('wrong types and bad fields are repaired', () => {
+test('wrong types are repaired', () => {
   const out = sanitize(
-    {
-      currency: 'USD',
-      income: 1500,
-      rows: [{ id: 'a', label: 5, mode: 'weird', value: 20, unit: 'moon' }],
-    },
+    { currency: 'USD', income: 1500, rows: [{ id: 'a', label: 5, unit: 'percent', value: 20 }] },
     VALID,
     'USD',
   );
   assert.equal(out.income, '1500');
-  assert.deepEqual(out.rows, [{ id: 'a', label: '', mode: 'percent', value: '20', unit: 'source' }]);
+  assert.deepEqual(out.rows, [{ id: 'a', label: '', unit: 'percent', value: '20' }]);
 });
 
 test('duplicate row ids fall back to the default rows', () => {
   const rows = [
-    { id: 'a', label: 'One', mode: 'percent', value: '50', unit: 'source' },
-    { id: 'a', label: 'Two', mode: 'percent', value: '50', unit: 'source' },
+    { id: 'a', label: 'One', unit: 'percent', value: '50' },
+    { id: 'a', label: 'Two', unit: 'percent', value: '50' },
   ];
   assert.deepEqual(sanitize({ currency: 'USD', income: '10', rows }, VALID, 'USD').rows, DEFAULT_ROWS);
 });
 
+test('an empty list of rows falls back to the default rows', () => {
+  assert.deepEqual(sanitize({ currency: 'USD', income: '10', rows: [] }, VALID, 'USD').rows, DEFAULT_ROWS);
+});
+
 test('too many rows are cut to the limit and long labels are shortened', () => {
   const rows = Array.from({ length: 20 }, (_, i) => ({
-    id: `r${i}`, label: 'x'.repeat(60), mode: 'percent', value: '1', unit: 'source',
+    id: `r${i}`, label: 'x'.repeat(60), unit: 'percent', value: '1',
   }));
   const out = sanitize({ currency: 'USD', income: '10', rows }, VALID, 'USD');
   assert.equal(out.rows.length, 8);

@@ -1,27 +1,27 @@
 // src/components/BudgetSplit.jsx
-// Split a monthly income into peso amounts. Replaces the old converter.
+// Split a monthly income into peso amounts.
 //
-// Reading order: headline, the split bar, the rows, the rate, the notes.
-// The headline states the biggest share in pesos, then the rows show the
-// rest. All the maths is in lib/budget.js. This file holds the settings
-// and puts them on screen.
+// Reading order: headline, income and rate, the split bar, the rows, one
+// message, then a note about the recorded range. The maths is in
+// lib/split.js. This file holds the settings and puts them on screen.
+//
+// Each row has one value and one unit (%, the income currency, or pesos).
+// Leave one row empty and it fills itself with what is left.
+//
+// Changing the income currency keeps every number as typed. An amount of
+// 300 in the income currency stays 300, and only the label changes.
 //
 // The rate starts at today's rate and can be edited. The edit is not
 // saved, so tomorrow always starts from the new day's rate.
 
 import { useEffect, useMemo, useState } from 'react';
-import { colors } from '../constants/theme';
 import { DEFAULT_INCOME, DEFAULT_ROWS, MAX_ROWS, ROW_COLORS } from '../constants/budget';
 import { rankCurrencies, defaultCurrency } from '../lib/rank';
-import { computeBudget, makeRow, parseAmount } from '../lib/budget';
+import { computeSplit, makeRow, parseAmount } from '../lib/split';
+import { formatMoney, formatPeso } from '../lib/format';
 import { loadSettings, saveSettings, clearSettings } from '../lib/budgetStorage';
 import BudgetRow from './BudgetRow';
-
-const peso = (n) =>
-  '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-const money = (n) =>
-  n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+import BudgetNotice from './BudgetNotice';
 
 export default function BudgetSplit({ series, latest }) {
   const available = rankCurrencies(latest);
@@ -40,10 +40,7 @@ export default function BudgetSplit({ series, latest }) {
     saveSettings(settings);
   }, [settings]);
 
-  const result = useMemo(
-    () => computeBudget({ total: income, rate, rows }),
-    [income, rate, rows],
-  );
+  const result = useMemo(() => computeSplit({ total: income, rate, rows }), [income, rate, rows]);
 
   if (available.length === 0) return null;
 
@@ -51,7 +48,7 @@ export default function BudgetSplit({ series, latest }) {
   const changeRow = (id, patch) =>
     update({ rows: rows.map((r) => (r.id === id ? { ...r, ...patch } : r)) });
   const removeRow = (id) => update({ rows: rows.filter((r) => r.id !== id) });
-  const addRow = () => update({ rows: [...rows, makeRow({ label: '' })] });
+  const addRow = () => update({ rows: [...rows, makeRow()] });
 
   function chooseCurrency(c) {
     setRateText(null);
@@ -70,17 +67,20 @@ export default function BudgetSplit({ series, latest }) {
   const high = history.length ? Math.max(...history) : 0;
   const incomeNum = parseAmount(income);
 
-  // The biggest row by peso amount, for the headline.
-  const top = result.rows.reduce((m, r) => (r.php > (m?.php ?? 0) ? r : m), null);
-
+  const ready = result.status !== 'norate' && result.status !== 'noincome';
   const colorOf = (i) => ROW_COLORS[i % ROW_COLORS.length];
-  const ready = result.status !== 'norate' && result.status !== 'empty';
+
+  // The biggest row by pesos, for the headline.
+  const top = result.rows.reduce(
+    (m, r) => ((r.state === 'filled' || r.state === 'auto') && r.php > (m?.php ?? 0) ? r : m),
+    null,
+  );
 
   let headline = 'Enter your monthly income to see the split.';
   if (result.status === 'norate') headline = 'Enter a rate above zero to see the split.';
-  else if (ready) {
-    headline = `${currency} ${money(result.income)} is ${peso(result.incomePhp)} a month.`;
-  }
+  else if (ready) headline = `${currency} ${formatMoney(result.income)} is ${formatPeso(result.incomePhp)} a month.`;
+
+  const showLeft = result.status === 'under' || result.status === 'needmore';
 
   return (
     <section className="panel budget">
@@ -88,9 +88,9 @@ export default function BudgetSplit({ series, latest }) {
         <div>
           <h2 className="panel__title">{headline}</h2>
           <p className="panel__sub">
-            {ready && top && top.php > 0
-              ? `Most of it, ${peso(top.phpRounded)}, goes to ${top.label || 'the first row'}.`
-              : 'Set your income and how you want to divide it. Everything here can be changed.'}
+            {ready && top && result.status === 'complete'
+              ? `Most of it, ${formatPeso(top.phpRounded)}, goes to ${top.label || 'the first row'}.`
+              : 'Set your income and divide it. Everything here can be changed.'}
           </p>
         </div>
         <button type="button" className="linkbtn" onClick={resetAll}>
@@ -99,46 +99,41 @@ export default function BudgetSplit({ series, latest }) {
       </div>
 
       <div className="budget__top">
-        <label className="field">
-          <span className="field__label">Monthly income</span>
-          <input
-            type="text"
-            inputMode="decimal"
-            value={income}
-            placeholder="0"
-            aria-label={`Monthly income in ${currency}`}
-            onChange={(e) => update({ income: e.target.value })}
-          />
-        </label>
-
         <div className="field">
-          <span className="field__label">Paid in</span>
-          <div className="switch" role="group" aria-label="Choose the income currency">
-            {available.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => chooseCurrency(c)}
-                aria-pressed={c === currency}
-                className={c === currency ? 'switch__btn switch__btn--on' : 'switch__btn'}
-              >
-                {c}
-              </button>
-            ))}
+          <label className="field__label" htmlFor="budget-income">Monthly income</label>
+          <div className="joined">
+            <input
+              id="budget-income"
+              type="text"
+              inputMode="decimal"
+              value={income}
+              placeholder="0"
+              onChange={(e) => update({ income: e.target.value })}
+            />
+            <select
+              value={currency}
+              aria-label="Income currency"
+              onChange={(e) => chooseCurrency(e.target.value)}
+            >
+              {available.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <label className="field">
-          <span className="field__label">
+        <div className="field">
+          <label className="field__label" htmlFor="budget-rate">
             Pesos per {currency}
             <span className="field__tag">{edited ? 'edited' : 'today'}</span>
-          </span>
-          <span className="field__row">
+          </label>
+          <div className="field__row">
             <input
+              id="budget-rate"
+              className="field__input"
               type="text"
               inputMode="decimal"
               value={rateShown}
-              aria-label={`Pesos per ${currency}`}
               onChange={(e) => setRateText(e.target.value)}
             />
             {edited && (
@@ -146,8 +141,8 @@ export default function BudgetSplit({ series, latest }) {
                 Use today
               </button>
             )}
-          </span>
-        </label>
+          </div>
+        </div>
       </div>
 
       {ready && result.assigned > 0 && (
@@ -156,7 +151,7 @@ export default function BudgetSplit({ series, latest }) {
           role="img"
           aria-label={result.rows
             .filter((r) => r.php > 0)
-            .map((r) => `${r.label || 'Row'} ${r.share.toFixed(0)} percent`)
+            .map((r) => `${r.label || 'Row'} ${r.shareRounded} percent`)
             .join(', ')}
         >
           {result.rows.map((r, i) =>
@@ -165,15 +160,15 @@ export default function BudgetSplit({ series, latest }) {
                 key={r.id}
                 className="sbar__seg"
                 style={{ flexGrow: r.source, background: colorOf(i) }}
-                title={`${r.label || 'Row'}: ${peso(r.phpRounded)}`}
+                title={`${r.label || 'Row'}: ${formatPeso(r.phpRounded)}`}
               />
             ) : null,
           )}
-          {result.status === 'under' && (
-            <span className="sbar__seg sbar__seg--free" style={{ flexGrow: result.unassigned }} />
-          )}
+          {showLeft && <span className="sbar__seg sbar__seg--free" style={{ flexGrow: result.left }} />}
         </div>
       )}
+
+      <p className="budget__hint">Leave one row empty and it fills itself.</p>
 
       <ul className="brows">
         {rows.map((row, i) => (
@@ -184,6 +179,7 @@ export default function BudgetSplit({ series, latest }) {
             currency={currency}
             color={colorOf(i)}
             canRemove={rows.length > 1}
+            canConvert={ready}
             onChange={(patch) => changeRow(row.id, patch)}
             onRemove={() => removeRow(row.id)}
           />
@@ -194,27 +190,14 @@ export default function BudgetSplit({ series, latest }) {
         <button type="button" className="addbtn" onClick={addRow} disabled={rows.length >= MAX_ROWS}>
           + Add a row
         </button>
-
-        {ready && result.status === 'under' && (
-          <p className="budget__msg">
-            {peso(result.unassignedPhp)} ({currency} {money(result.unassigned)}) is not assigned yet.
-          </p>
-        )}
-        {ready && result.status === 'over' && (
-          <p className="budget__msg budget__msg--bad" style={{ color: colors.down }}>
-            The rows add up to {peso(result.overPhp)} ({currency} {money(result.over)}) more than your income.
-          </p>
-        )}
-        {ready && result.status === 'ok' && (
-          <p className="budget__msg">Every peso is assigned.</p>
-        )}
+        {ready && <BudgetNotice result={result} currency={currency} />}
       </div>
 
       {ready && history.length > 0 && incomeNum > 0 && (
         <p className="panel__sub budget__note">
-          Across {history.length} recorded days, {currency} {money(incomeNum)} has been worth{' '}
-          {peso(incomeNum * low)} to {peso(incomeNum * high)}. That is what did happen, not a
-          forecast. Percent rows split what is left after any fixed rows.
+          Across {history.length} recorded days, {currency} {formatMoney(incomeNum)} has been worth{' '}
+          {formatPeso(incomeNum * low)} to {formatPeso(incomeNum * high)}. That is what did happen,
+          not a forecast.
         </p>
       )}
     </section>
