@@ -6,7 +6,9 @@
 // lib/split.js. This file holds the settings and puts them on screen.
 //
 // Each row has one value and one unit (%, the income currency, or pesos).
-// Leave one row empty and it fills itself with what is left.
+// Leave one row empty and it fills itself with what is left. When every row
+// has a value and one is changed, the row that last filled itself (or the
+// last row) fills itself again, so the split keeps adding up.
 //
 // Changing the income currency keeps every number as typed. An amount of
 // 300 in the income currency stays 300, and only the label changes.
@@ -17,7 +19,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { DEFAULT_INCOME, DEFAULT_ROWS, MAX_ROWS, ROW_COLORS } from '../constants/budget';
 import { rankCurrencies, defaultCurrency } from '../lib/rank';
-import { computeSplit, makeRow, parseAmount } from '../lib/split';
+import { applyEdit, computeSplit, makeRow, parseAmount } from '../lib/split';
 import { formatMoney, formatPeso } from '../lib/format';
 import { loadSettings, saveSettings, clearSettings } from '../lib/budgetStorage';
 import BudgetRow from './BudgetRow';
@@ -29,6 +31,7 @@ export default function BudgetSplit({ series, latest }) {
 
   const [settings, setSettings] = useState(() => loadSettings(available, fallback));
   const [rateText, setRateText] = useState(null); // null means "use today's rate"
+  const [balanceId, setBalanceId] = useState(null); // the row that last filled itself
 
   const { currency, income, rows } = settings;
   const today = latest[currency]?.value ?? 0;
@@ -42,11 +45,15 @@ export default function BudgetSplit({ series, latest }) {
 
   const result = useMemo(() => computeSplit({ total: income, rate, rows }), [income, rate, rows]);
 
+  // Remember which row filled itself last. Later edits balance against it.
+  useEffect(() => {
+    if (result.autoId) setBalanceId(result.autoId);
+  }, [result.autoId]);
+
   if (available.length === 0) return null;
 
   const update = (patch) => setSettings((s) => ({ ...s, ...patch }));
-  const changeRow = (id, patch) =>
-    update({ rows: rows.map((r) => (r.id === id ? { ...r, ...patch } : r)) });
+  const changeRow = (id, patch) => update({ rows: applyEdit(rows, id, patch, balanceId) });
   const removeRow = (id) => update({ rows: rows.filter((r) => r.id !== id) });
   const addRow = () => update({ rows: [...rows, makeRow()] });
 
@@ -168,7 +175,7 @@ export default function BudgetSplit({ series, latest }) {
         </div>
       )}
 
-      <p className="budget__hint">Leave one row empty and it fills itself.</p>
+      <p className="budget__hint">Leave a row empty and it fills itself. Change a row and the auto row adjusts.</p>
 
       <ul className="brows">
         {rows.map((row, i) => (

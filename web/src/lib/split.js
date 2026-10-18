@@ -223,3 +223,29 @@ export function computeSplit({ total, rate, rows }) {
 
   return out;
 }
+
+/**
+ * Applies one edit to the rows and keeps the split balanced.
+ *
+ * When every row has a value and the user changes one of them, the
+ * balancing row is emptied so it fills itself with what is left. The
+ * balancing row is the one that last filled itself. If none did yet,
+ * it is the last row.
+ *
+ * Nothing is balanced when the edited row is the balancing row, when the
+ * edit is only a name, when the new value is empty, or when some row was
+ * already empty (that row is already filling itself).
+ */
+export function applyEdit(rows, id, patch, balanceId) {
+  const next = rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
+
+  const touchesAmount = 'value' in patch || 'unit' in patch;
+  if (!touchesAmount) return next;
+  if ('value' in patch && String(patch.value).trim() === '') return next;
+  if (rows.some((r) => String(r.value).trim() === '')) return next;
+
+  const target = rows.find((r) => r.id === balanceId) ?? rows[rows.length - 1];
+  if (!target || target.id === id) return next;
+
+  return next.map((r) => (r.id === target.id ? { ...r, value: '' } : r));
+}

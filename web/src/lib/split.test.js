@@ -4,7 +4,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { computeSplit, parseAmount, formatValue, roundShares, makeRow } from './split.js';
+import { computeSplit, parseAmount, formatValue, roundShares, makeRow, applyEdit } from './split.js';
 
 const close = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, msg ?? `${a} is not close to ${b}`);
 const row = (id, unit, value) => ({ id, label: id, unit, value });
@@ -216,4 +216,46 @@ test('makeRow gives each row its own id and starts empty', () => {
   assert.equal(b.label, 'Family');
   assert.equal(a.unit, 'percent');
   assert.equal(a.value, '');
+});
+
+test('editing a row empties the balancing row so it can fill itself', () => {
+  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+  const next = applyEdit(rows, 'a', { value: '70' }, 'c');
+  assert.equal(next[0].value, '70');
+  assert.equal(next[2].value, '');
+  const r = run(next);
+  assert.equal(r.status, 'complete');
+  close(byId(r, 'c').share, 0);
+});
+
+test('with no balancing row chosen yet, the last row balances', () => {
+  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+  const next = applyEdit(rows, 'b', { value: '20' }, undefined);
+  assert.equal(next[2].value, '');
+  close(byId(run(next), 'c').share, 20);
+});
+
+test('editing the balancing row itself changes nothing else', () => {
+  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+  const next = applyEdit(rows, 'c', { value: '5' }, 'c');
+  assert.deepEqual(next.map((r) => r.value), ['60', '30', '5']);
+});
+
+test('names, empty values and already empty rows are left alone', () => {
+  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+  assert.deepEqual(applyEdit(rows, 'a', { label: 'Rent' }, 'c').map((r) => r.value), ['60', '30', '10']);
+  assert.deepEqual(applyEdit(rows, 'a', { value: '' }, 'c').map((r) => r.value), ['', '30', '10']);
+  const gap = [row('a', 'percent', '60'), row('b', 'percent', ''), row('c', 'percent', '10')];
+  assert.deepEqual(applyEdit(gap, 'a', { value: '50' }, 'c').map((r) => r.value), ['50', '', '10']);
+});
+
+test('a unit change on another row also rebalances', () => {
+  const rows = [row('a', 'percent', '60'), row('b', 'percent', '30'), row('c', 'percent', '10')];
+  const next = applyEdit(rows, 'a', { unit: 'source' }, 'c');
+  assert.equal(next[2].value, '');
+});
+
+test('a single row never empties itself', () => {
+  const rows = [row('a', 'percent', '60')];
+  assert.equal(applyEdit(rows, 'a', { value: '50' }, 'a')[0].value, '50');
 });
