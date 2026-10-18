@@ -8,32 +8,32 @@ A small data pipeline that tracks what the Philippine peso is worth, every day, 
 
 <!-- PRESYO:START -->
 
-**Latest rates — 18 Oct 2026**
+**Latest rates — 17 Oct 2026**
 
 | Currency | Pesos per unit |
 |---|---|
-| AED | 17.1623 |
-| CAD | 44.5522 |
-| GBP | 83.9435 |
-| HKD | 8.0311 |
-| JPY | 0.3989 |
-| SAR | 16.8076 |
-| SGD | 49.2446 |
-| USD | 63.0286 |
+| AED | 17.1685 |
+| CAD | 44.5677 |
+| GBP | 83.9743 |
+| HKD | 8.0341 |
+| JPY | 0.3991 |
+| SAR | 16.8136 |
+| SGD | 49.2619 |
+| USD | 63.0512 |
 
-**72 days collected** (06 Aug 2026 → 18 Oct 2026) · 531 rows
+**71 days collected** (06 Aug 2026 → 17 Oct 2026) · 523 rows
 
 **Recent runs**
 
 | Started | Status | Read | Loaded | Rejected |
 |---|---|---|---|---|
-| 18 Oct 2026 05:50 UTC | PASS | 8 | 8 | 0 |
 | 17 Oct 2026 05:33 UTC | PASS | 8 | 8 | 0 |
 | 16 Oct 2026 05:48 UTC | PASS | 8 | 8 | 0 |
 | 15 Oct 2026 05:52 UTC | PASS | 8 | 8 | 0 |
 | 14 Oct 2026 06:06 UTC | PASS | 8 | 8 | 0 |
+| 13 Oct 2026 07:40 UTC | PASS | 8 | 8 | 0 |
 
-<sub>Updated automatically by the daily workflow · 18 Oct 2026 05:50 UTC</sub>
+<sub>Updated automatically by the daily workflow · 17 Oct 2026 05:33 UTC</sub>
 
 <!-- PRESYO:END -->
 
@@ -94,7 +94,14 @@ python -m presyo.run
 
 ## The web page
 
-`web/` is a small React + Vite page that reads the same two tables over Supabase's REST endpoint and deploys to Vercel.
+`web/` is a React and Vite page that reads the same two tables over Supabase's REST endpoint and deploys to Vercel. It is one glance view with no tabs. On a phone it stacks into a single column.
+
+What is on it:
+
+- **Rates board.** Every currency with today's rate and the day's move, ranked so the strongest against the peso is on top.
+- **Chart.** One currency over the recorded days, with the low and high marked.
+- **Budget calculator.** Split a monthly income into peso amounts (see below).
+- **Folds.** Short sections for the source, who it is for, the run log and the limits.
 
 ```bash
 cd web
@@ -107,6 +114,23 @@ It uses the **anon** key, not the service key. That is safe: the policies in `sq
 
 To deploy: point Vercel at this repo, set the root directory to `web`, and add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables.
 
+### Budget calculator
+
+Type a monthly income in any tracked currency and divide it into rows such as Savings, Needs and Wants. Each row shows its amount in pesos, in the income currency, and as a share.
+
+- **One value and one unit per row.** The unit is a percent, an amount in the income currency, or an amount in pesos. Each row picks its own.
+- **Starts at today's rate.** The rate can be edited for what if checks. The edit is not saved, so each new day starts from the new rate.
+- **Leave one row empty and it fills itself** with whatever is left, and shows the number in the field.
+- **Two or more empty rows** show a reminder of how many to fill in and how much is left to assign.
+- **Auto balance.** When every row has a value and a change pushes the total over or under, the row that last filled itself fills itself again. This runs for edits to a row, the income, the rate or the currency.
+- **Lock a row** to keep auto balance from changing it.
+- **Presets** for 60 / 30 / 10, 50 / 30 / 20, 70 / 20 / 10 and 80 / 20.
+- **Switching the currency or a row unit** keeps the typed numbers and only changes the label. Nothing is converted behind your back.
+- **Save as PDF** opens the browser print dialog with a one page A4 summary. It has the income, the rate and its date, each row, totals, what is left, the recorded range and the source.
+- **Stays in the browser.** Settings are saved in local storage on your device. Nothing is sent anywhere.
+
+The maths lives in `web/src/lib/split.js` with no React in it, so it can be tested on its own. Amounts and percents are rounded together so the rows always add up to the total shown.
+
 ## Tests
 
 ```bash
@@ -114,6 +138,15 @@ python -m pytest -q
 ```
 
 Covers the conversion maths and every validation rule. Tests run in CI before the pipeline is allowed to write anything.
+
+The page has its own tests, using the test runner built into Node:
+
+```bash
+cd web
+npm test
+```
+
+They cover the split maths and auto balance, reading saved settings, the presets, and date and money formatting.
 
 ## Layout
 
@@ -127,7 +160,16 @@ src/presyo/
   report.py          rewrites the Status block in this README
 sql/schema.sql       tables, indexes, security policies
 tests/               unit tests
-web/                 the public page — React + Vite, reads the same tables
+web/src/
+  App.jsx            page layout
+  components/        Board, RateChart, RunDots, the Budget parts, the fold sections
+  constants/         budget.js (defaults, presets), theme.js, facts.js
+  lib/
+    api.js           reads Supabase and shapes the rows
+    split.js         budget split maths and auto balance
+    budgetStorage.js reads and writes saved settings safely
+    format.js        dates, pesos and money
+    rank.js          orders currencies by strength
 ```
 
 ## Roadmap
