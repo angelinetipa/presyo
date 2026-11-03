@@ -19,6 +19,7 @@ import {
 import { colors } from '../constants/theme';
 import { rankCurrencies, defaultCurrency } from '../lib/rank';
 import { formatDay } from '../lib/format';
+import InfoTip from './InfoTip';
 
 const PESO = '₱';
 const SHORT_RECORD = 30; // below this many days, the page says it is too early to call a trend
@@ -89,6 +90,10 @@ export default function RateChart({ series, latest }) {
             </button>
           ))}
         </div>
+        <InfoTip label="How to read this chart">
+          The amber dot is today. Up means one {active} buys more pesos. The scale does not
+          start at zero, so small moves look bigger than they are.
+        </InfoTip>
       </div>
 
       <div className="chart__box">
@@ -135,11 +140,6 @@ export default function RateChart({ series, latest }) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
-      <p className="panel__sub">
-        The amber dot is today. Up means one {active} buys more pesos. The scale does not
-        start at zero, so small moves look bigger than they are.
-      </p>
     </section>
   );
 }

@@ -147,27 +147,24 @@ a:hover {
   box-shadow: 0 14px 34px rgba(22, 35, 46, 0.22);
 }
 
-.board__head,
-.board__foot {
+.board__head {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  padding: 0.7rem 1.1rem;
+  padding: 0.45rem 0.7rem 0.45rem 1.1rem;
   font-family: var(--mono);
   font-size: 0.68rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: #8FA0AD;
-}
-
-.board__head {
   border-bottom: 1px solid var(--board-rule);
 }
 
-.board__foot {
-  border-top: 1px solid var(--board-rule);
-  text-transform: none;
-  letter-spacing: 0;
+.board__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .board__rows {
@@ -555,12 +552,6 @@ a:hover {
 .chip:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
-}
-
-.budget__hint {
-  margin: 0 0 0.3rem;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
 }
 
 .sbar {

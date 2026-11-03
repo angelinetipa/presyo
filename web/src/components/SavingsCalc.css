@@ -33,6 +33,13 @@
   font-size: 0.84rem;
 }
 
+/* The mode choice and the info button sit together on the right. */
+.savecalc__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 /* Two choices, one selected. */
 .seg {
   display: inline-flex;
@@ -211,34 +218,6 @@
   font-size: 0.84rem;
 }
 
-.savecalc__foot {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  margin-top: 1rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid var(--board-rule);
-  color: #8FA0AD;
-  font-size: 0.8rem;
-}
-
-.savecalc__tag {
-  flex: none;
-  padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: rgba(95, 211, 160, 0.15);
-  color: var(--up);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.savecalc__tag--off {
-  background: rgba(255, 255, 255, 0.08);
-  color: #B9C4CC;
-}
-
 @media (max-width: 560px) {
   .savecalc {
     padding: 1.1rem 1rem 0.9rem;
@@ -248,8 +227,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .seg {
+  .savecalc__tools {
     width: 100%;
+  }
+
+  .seg {
+    flex: 1 1 auto;
   }
 
   .seg button {

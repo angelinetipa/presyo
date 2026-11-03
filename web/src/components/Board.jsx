@@ -9,6 +9,7 @@
 import { colors, CURRENCY_NOTE } from '../constants/theme';
 import { rankCurrencies } from '../lib/rank';
 import { formatDay } from '../lib/format';
+import InfoTip from './InfoTip';
 
 function Delta({ pct }) {
   if (pct == null) return <span style={{ color: colors.flat }}>n/a</span>;
@@ -30,7 +31,12 @@ export default function Board({ latest, lastDate }) {
     <section className="board" aria-label="Latest exchange rates">
       <header className="board__head">
         <span>Pesos per unit</span>
-        <span>{lastDate ? formatDay(lastDate, 'medium') : 'n/a'}</span>
+        <span className="board__meta">
+          <span>{lastDate ? formatDay(lastDate, 'medium') : 'n/a'}</span>
+          <InfoTip tone="dark" label="About the rate board">
+            Highest to lowest. Change is against the previous recorded day.
+          </InfoTip>
+        </span>
       </header>
 
       <ol className="board__rows">
@@ -46,10 +52,6 @@ export default function Board({ latest, lastDate }) {
           );
         })}
       </ol>
-
-      <footer className="board__foot">
-        Highest to lowest. Change is against the previous recorded day.
-      </footer>
     </section>
   );
 }

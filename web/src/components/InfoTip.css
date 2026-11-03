@@ -1,0 +1,114 @@
+/* src/components/InfoTip.css
+   The info button and its hint. Colours come from styles.css.
+   The button takes its colour from the panel it sits on (tone). The hint
+   uses the opposite colour so it stands out from the panel. */
+
+.infotip {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.infotip__btn {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.infotip__btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.infotip__btn:hover,
+.infotip[data-open] .infotip__btn {
+  color: var(--ink);
+}
+
+.infotip--dark .infotip__btn {
+  color: #8FA0AD;
+}
+
+.infotip--dark .infotip__btn:hover,
+.infotip--dark[data-open] .infotip__btn {
+  color: #FFFFFF;
+}
+
+.infotip--dark .infotip__btn:focus-visible {
+  outline-color: var(--digit);
+}
+
+/* The hint. Hidden until the control is open. */
+.infotip__tip {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 20;
+  width: max-content;
+  max-width: min(17rem, calc(100vw - 2.5rem));
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #FFFFFF;
+  box-shadow: 0 10px 28px rgba(22, 35, 46, 0.28);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.5;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
+  pointer-events: none;
+}
+
+/* Fills the gap between the button and the hint so hover is not lost. */
+.infotip__tip::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
+.infotip[data-open] .infotip__tip {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+  pointer-events: auto;
+}
+
+.infotip--end .infotip__tip {
+  right: -4px;
+}
+
+.infotip--start .infotip__tip {
+  left: -4px;
+}
+
+.infotip--dark .infotip__tip {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+.infotip__line {
+  display: block;
+}
+
+.infotip__line+.infotip__line {
+  margin-top: 0.45rem;
+}

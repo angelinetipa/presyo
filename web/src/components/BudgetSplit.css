@@ -1,6 +1,6 @@
 /* src/components/BudgetSplit.css
-   The headline under the section title, and the note about the link to
-   the savings calculator. Colours and spacing come from styles.css. */
+   The headline under the section title. Colours and spacing come from
+   styles.css. */
 
 .budget__result {
   margin: 0 0 1rem;
@@ -17,13 +17,4 @@
   letter-spacing: -0.01em;
   line-height: 1.25;
   overflow-wrap: anywhere;
-}
-
-.budget__link {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin: 0.45rem 0 0.2rem;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
 }

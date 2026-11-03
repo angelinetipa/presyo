@@ -27,6 +27,7 @@ import BudgetRow from './BudgetRow';
 import BudgetNotice from './BudgetNotice';
 import BudgetPresets from './BudgetPresets';
 import BudgetReport, { printReport } from './BudgetReport';
+import InfoTip from './InfoTip';
 import './BudgetSplit.css';
 
 export default function BudgetSplit({ budget, series, lastDate }) {
@@ -58,6 +59,7 @@ export default function BudgetSplit({ budget, series, lastDate }) {
   else if (ready) headline = `${currency} ${formatMoney(result.income)} is ${formatPeso(result.incomePhp)} a month.`;
 
   const showLeft = result.status === 'under' || result.status === 'needmore';
+  const linked = Boolean(findSavingsRow(rows));
 
   return (
     <section className="panel budget">
@@ -78,6 +80,16 @@ export default function BudgetSplit({ budget, series, lastDate }) {
           <button type="button" className="linkbtn" onClick={resetAll}>
             Reset to defaults
           </button>
+          <InfoTip label="How the budget planner works">
+            <span className="infotip__line">
+              Leave a row empty and it fills itself. Change a row and another adjusts. Lock a row to stop that.
+            </span>
+            {linked && (
+              <span className="infotip__line">
+                The Savings row is shared with the savings calculator.
+              </span>
+            )}
+          </InfoTip>
         </div>
       </div>
 
@@ -161,15 +173,6 @@ export default function BudgetSplit({ budget, series, lastDate }) {
       )}
 
       <BudgetPresets rows={rows} onPick={pickPreset} />
-
-      <p className="budget__hint">Leave a row empty and it fills itself. Change a row and another adjusts. Lock a row to stop that.</p>
-
-      {findSavingsRow(rows) && (
-        <p className="budget__link">
-          <span className="field__tag">Linked</span>
-          The Savings row is shared with the savings calculator below.
-        </p>
-      )}
 
       <ul className="brows">
         {rows.map((row, i) => (

@@ -23,6 +23,7 @@ import {
 import { findSavingsRow } from '../lib/savingsLink';
 import { parseAmount } from '../lib/split';
 import { formatMoney, formatPeso } from '../lib/format';
+import InfoTip from './InfoTip';
 import './SavingsCalc.css';
 
 // Whole pesos from 100 up. Small amounts keep their centavos.
@@ -116,13 +117,20 @@ export default function SavingsCalc({ budget }) {
           <h2 className="savecalc__title">Savings calculator</h2>
           <p className="savecalc__sub">See how much your savings add up to over days, months or years.</p>
         </div>
-        <div className="seg" role="group" aria-label="What do you want to find out">
-          <button type="button" aria-pressed={mode === 'save'} onClick={() => setMode('save')}>
-            I save this much
-          </button>
-          <button type="button" aria-pressed={mode === 'goal'} onClick={() => setMode('goal')}>
-            I have a goal
-          </button>
+        <div className="savecalc__tools">
+          <div className="seg" role="group" aria-label="What do you want to find out">
+            <button type="button" aria-pressed={mode === 'save'} onClick={() => setMode('save')}>
+              I save this much
+            </button>
+            <button type="button" aria-pressed={mode === 'goal'} onClick={() => setMode('goal')}>
+              I have a goal
+            </button>
+          </div>
+          <InfoTip tone="dark" label="About the link to the budget">
+            {linked
+              ? 'Linked to the Savings row in the budget. Change the savings here and the budget follows. Change the Savings row in the budget and this follows.'
+              : 'Not linked. Add a row named Savings to the budget to link this calculator to it.'}
+          </InfoTip>
         </div>
       </header>
 
@@ -234,20 +242,6 @@ export default function SavingsCalc({ budget }) {
       {tooMuch && (
         <p className="savecalc__warn">That is more than your monthly income of {formatPeso(result.incomePhp)}.</p>
       )}
-
-      <footer className="savecalc__foot">
-        {linked ? (
-          <>
-            <span className="savecalc__tag">Linked</span>
-            <span>Change the savings here and the budget follows. Change the Savings row in the budget and this follows.</span>
-          </>
-        ) : (
-          <>
-            <span className="savecalc__tag savecalc__tag--off">Not linked</span>
-            <span>Add a row named Savings to the budget to link this calculator to it.</span>
-          </>
-        )}
-      </footer>
     </section>
   );
 }
