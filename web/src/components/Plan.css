@@ -1,0 +1,8 @@
+/* src/components/Plan.css
+   The planning section stacks its panels with an even gap. */
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
