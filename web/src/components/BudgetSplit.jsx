@@ -1,8 +1,9 @@
 // src/components/BudgetSplit.jsx
 // Split a monthly income into peso amounts.
 //
-// Reading order: headline, income and rate, the split bar, the rows, one
-// message, then a note about the recorded range. The maths is in
+// Reading order: title and purpose, headline, income and rate, the split
+// bar, the rows, one message, then a note about the recorded range. The
+// title says what the section is for, so a new visitor knows. The maths is in
 // lib/split.js. The settings and every change a person can make are in
 // hooks/useBudget.js, passed in as budget. This file puts them on screen.
 //
@@ -20,11 +21,13 @@
 
 import { MAX_ROWS, ROW_COLORS } from '../constants/budget';
 import { parseAmount } from '../lib/split';
+import { findSavingsRow } from '../lib/savingsLink';
 import { formatMoney, formatPeso } from '../lib/format';
 import BudgetRow from './BudgetRow';
 import BudgetNotice from './BudgetNotice';
 import BudgetPresets from './BudgetPresets';
 import BudgetReport, { printReport } from './BudgetReport';
+import './BudgetSplit.css';
 
 export default function BudgetSplit({ budget, series, lastDate }) {
   const {
@@ -60,12 +63,8 @@ export default function BudgetSplit({ budget, series, lastDate }) {
     <section className="panel budget">
       <div className="panel__head">
         <div>
-          <h2 className="panel__title">{headline}</h2>
-          <p className="panel__sub">
-            {ready && top && result.status === 'complete'
-              ? `Most of it, ${formatPeso(top.phpRounded)}, goes to ${top.label || 'the first row'}.`
-              : 'Set your income and divide it. Everything here can be changed.'}
-          </p>
+          <h2 className="panel__title">Budget planner</h2>
+          <p className="panel__sub">Split your monthly income into savings, needs and wants.</p>
         </div>
         <div className="panel__actions">
           <button
@@ -80,6 +79,15 @@ export default function BudgetSplit({ budget, series, lastDate }) {
             Reset to defaults
           </button>
         </div>
+      </div>
+
+      <div className="budget__result">
+        <p className="budget__headline">{headline}</p>
+        <p className="panel__sub">
+          {ready && top && result.status === 'complete'
+            ? `Most of it, ${formatPeso(top.phpRounded)}, goes to ${top.label || 'the first row'}.`
+            : 'Everything here can be changed.'}
+        </p>
       </div>
 
       <div className="budget__top">
@@ -155,6 +163,13 @@ export default function BudgetSplit({ budget, series, lastDate }) {
       <BudgetPresets rows={rows} onPick={pickPreset} />
 
       <p className="budget__hint">Leave a row empty and it fills itself. Change a row and another adjusts. Lock a row to stop that.</p>
+
+      {findSavingsRow(rows) && (
+        <p className="budget__link">
+          <span className="field__tag">Linked</span>
+          The Savings row is shared with the savings calculator below.
+        </p>
+      )}
 
       <ul className="brows">
         {rows.map((row, i) => (
