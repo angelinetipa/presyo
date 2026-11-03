@@ -100,7 +100,8 @@ What is on it:
 
 - **Rates board.** Every currency with today's rate and the day's move, ranked so the strongest against the peso is on top.
 - **Chart.** One currency over the recorded days, with the low and high marked.
-- **Budget calculator.** Split a monthly income into peso amounts (see below).
+- **Budget planner.** Split a monthly income into savings, needs and wants (see below).
+- **Savings calculator.** See what your savings add up to over days, months or years, or what to save each month to reach a goal (see below).
 - **Folds.** Short sections for the source, who it is for, the run log and the limits.
 
 ```bash
@@ -114,7 +115,7 @@ It uses the **anon** key, not the service key. That is safe: the policies in `sq
 
 To deploy: point Vercel at this repo, set the root directory to `web`, and add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables.
 
-### Budget calculator
+### Budget planner
 
 Type a monthly income in any tracked currency and divide it into rows such as Savings, Needs and Wants. Each row shows its amount in pesos, in the income currency, and as a share.
 
@@ -131,6 +132,18 @@ Type a monthly income in any tracked currency and divide it into rows such as Sa
 
 The maths lives in `web/src/lib/split.js` with no React in it, so it can be tested on its own. Amounts and percents are rounded together so the rows always add up to the total shown.
 
+### Savings calculator
+
+A dark panel under the budget planner. It has two modes.
+
+- **I save this much.** Enter a monthly amount and a length of time in days, months or years. It shows the total, plus fixed lines for 1 day, 1 month, 6 months, 1 year and 5 years.
+- **I have a goal.** Enter a goal and a length of time. It shows the monthly amount needed, a bar for how much of that your savings cover, and how long the goal takes at your current monthly amount.
+- **Linked to the budget.** The monthly amount is the row named Savings in the budget planner. Change it in the calculator and the budget follows, with another row adjusting so the total still adds up. Change the Savings row in the budget and the calculator follows. A goal also writes its monthly amount into the budget.
+- **No interest.** Every figure is a plain sum of what is put aside. There is no rate, and nothing is predicted.
+- **No Savings row.** If the row is renamed or removed, the calculator says it is not linked and works on its own.
+
+The maths lives in `web/src/lib/savings.js`, and the link lives in `web/src/lib/savingsLink.js`. Neither has React in it. The shared budget settings are held in `web/src/hooks/useBudget.js`.
+
 ## Tests
 
 ```bash
@@ -146,7 +159,7 @@ cd web
 npm test
 ```
 
-They cover the split maths and auto balance, reading saved settings, the presets, and date and money formatting.
+They cover the split maths and auto balance, the savings maths, the link between the budget and the savings calculator, reading saved settings, the presets, and date and money formatting.
 
 ## Layout
 
@@ -162,11 +175,14 @@ sql/schema.sql       tables, indexes, security policies
 tests/               unit tests
 web/src/
   App.jsx            page layout
-  components/        Board, RateChart, RunDots, the Budget parts, the fold sections
+  components/        Board, RateChart, RunDots, Plan, the Budget parts, SavingsCalc, the fold sections
+  hooks/             useBudget.js (the budget settings, shared by the planner and the calculator)
   constants/         budget.js (defaults, presets), theme.js, facts.js
   lib/
     api.js           reads Supabase and shapes the rows
     split.js         budget split maths and auto balance
+    savings.js       savings totals, monthly amount for a goal, months to reach it
+    savingsLink.js   reads and sets the Savings row in the budget
     budgetStorage.js reads and writes saved settings safely
     format.js        dates, pesos and money
     rank.js          orders currencies by strength
