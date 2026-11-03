@@ -3,7 +3,7 @@
 //
 //   Header         title, last check, and a dot for each recent run
 //   Row one        rate board (left), chart (right)
-//   Row two        budget split calculator, full width
+//   Row two        plan section (budget split), full width
 //   Bottom         slim folds with the reading material
 //
 // Below 900px wide the columns stack in the same order.
@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { fetchRates, fetchRuns, shape } from './lib/api';
 import Board from './components/Board';
 import RateChart from './components/RateChart';
-import BudgetSplit from './components/BudgetSplit';
+import Plan from './components/Plan';
 import RunDots from './components/RunDots';
 import AboutStrip from './components/AboutStrip';
 import { formatDay } from './lib/format';
@@ -86,7 +86,7 @@ export default function App() {
           </div>
 
           <div className="dash__wide">
-            <BudgetSplit series={data.series} latest={data.latest} lastDate={data.lastDate} />
+            <Plan series={data.series} latest={data.latest} lastDate={data.lastDate} />
           </div>
         </div>
       )}

@@ -3,7 +3,8 @@
 //
 // Reading order: headline, income and rate, the split bar, the rows, one
 // message, then a note about the recorded range. The maths is in
-// lib/split.js. This file holds the settings and puts them on screen.
+// lib/split.js. The settings and every change a person can make are in
+// hooks/useBudget.js, passed in as budget. This file puts them on screen.
 //
 // Each row has one value and one unit (%, the income currency, or pesos).
 // Leave one row empty and it fills itself with what is left. When every row
@@ -17,95 +18,22 @@
 // The rate starts at today's rate and can be edited. The edit is not
 // saved, so tomorrow always starts from the new day's rate.
 
-import { useEffect, useMemo, useState } from 'react';
-import { DEFAULT_INCOME, DEFAULT_ROWS, MAX_ROWS, ROW_COLORS } from '../constants/budget';
-import { rankCurrencies, defaultCurrency } from '../lib/rank';
-import { rebalance, computeSplit, makeRow, parseAmount } from '../lib/split';
+import { MAX_ROWS, ROW_COLORS } from '../constants/budget';
+import { parseAmount } from '../lib/split';
 import { formatMoney, formatPeso } from '../lib/format';
-import { loadSettings, saveSettings, clearSettings } from '../lib/budgetStorage';
 import BudgetRow from './BudgetRow';
 import BudgetNotice from './BudgetNotice';
 import BudgetPresets from './BudgetPresets';
 import BudgetReport, { printReport } from './BudgetReport';
 
-export default function BudgetSplit({ series, latest, lastDate }) {
-  const available = rankCurrencies(latest);
-  const fallback = defaultCurrency(latest);
-
-  const [settings, setSettings] = useState(() => loadSettings(available, fallback));
-  const [rateText, setRateText] = useState(null); // null means "use today's rate"
-  const [balanceId, setBalanceId] = useState(null); // the row that last filled itself
-
-  const { currency, income, rows } = settings;
-  const today = latest[currency]?.value ?? 0;
-  const rateShown = rateText ?? (today ? today.toFixed(4) : '');
-  const edited = rateText !== null && parseAmount(rateText) !== Number(today.toFixed(4));
-  const rate = parseAmount(rateShown);
-
-  useEffect(() => {
-    saveSettings(settings);
-  }, [settings]);
-
-  const result = useMemo(() => computeSplit({ total: income, rate, rows }), [income, rate, rows]);
-
-  // Remember which row filled itself last. Later edits balance against it.
-  useEffect(() => {
-    if (result.autoId) setBalanceId(result.autoId);
-  }, [result.autoId]);
+export default function BudgetSplit({ budget, series, lastDate }) {
+  const {
+    available, currency, income, rows, rateShown, rate, edited, result,
+    changeRow, changeIncome, changeRate, resetRate,
+    removeRow, addRow, pickPreset, chooseCurrency, resetAll,
+  } = budget;
 
   if (available.length === 0) return null;
-
-  const update = (patch) => setSettings((s) => ({ ...s, ...patch }));
-
-  // Every change that can break the total goes through rebalance, so the
-  // balancing row refills itself. Name edits cannot change the total.
-  const keepBalanced = (nextRows, next = {}, editedId = null) => rebalance({
-    rows: nextRows,
-    total: next.income ?? income,
-    rate: next.rate ?? rate,
-    editedId,
-    balanceId,
-  });
-
-  function changeRow(id, patch) {
-    const next = rows.map((r) => (r.id === id ? { ...r, ...patch } : r));
-    const touchesAmount = 'value' in patch || 'unit' in patch;  // a lock or a name cannot break the total
-    update({ rows: touchesAmount ? keepBalanced(next, {}, id) : next });
-  }
-
-  function changeIncome(text) {
-    update({ income: text, rows: keepBalanced(rows, { income: text }) });
-  }
-
-  function changeRate(text) {
-    setRateText(text);
-    update({ rows: keepBalanced(rows, { rate: parseAmount(text) }) });
-  }
-
-  function useToday() {
-    setRateText(null);
-    update({ rows: keepBalanced(rows, { rate: today }) });
-  }
-  const removeRow = (id) => update({ rows: rows.filter((r) => r.id !== id) });
-  const addRow = () => update({ rows: [...rows, makeRow()] });
-
-  function pickPreset(preset) {
-    setBalanceId(null);
-    update({
-      rows: preset.rows.map(([label, value]) => makeRow({ label, unit: 'percent', value: String(value) })),
-    });
-  }
-
-  function chooseCurrency(c) {
-    setRateText(null);
-    update({ currency: c, rows: keepBalanced(rows, { rate: latest[c]?.value ?? 0 }) });
-  }
-
-  function resetAll() {
-    clearSettings();
-    setRateText(null);
-    setSettings({ currency: fallback, income: DEFAULT_INCOME, rows: DEFAULT_ROWS });
-  }
 
   // History for the range note. It uses real recorded days only.
   const history = series.map((d) => d[currency]).filter((v) => v != null);
@@ -193,7 +121,7 @@ export default function BudgetSplit({ series, latest, lastDate }) {
               onChange={(e) => changeRate(e.target.value)}
             />
             {edited && (
-              <button type="button" className="linkbtn" onClick={useToday}>
+              <button type="button" className="linkbtn" onClick={resetRate}>
                 Use today
               </button>
             )}
