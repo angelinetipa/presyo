@@ -1,6 +1,6 @@
 // src/components/WhoItsFor.jsx
 // Who feels the rate, and what a small move is worth in pesos.
-// Shown inside the "Why it matters" fold. Outside figures come from
+// Shown inside the "Why it matters" popover. Outside figures come from
 // constants/facts.js, each with its source.
 
 import { FACTS, COVERED, MISSED, REMITTANCE_SOURCES, TRACKED_BEYOND_LIST } from '../constants/facts';

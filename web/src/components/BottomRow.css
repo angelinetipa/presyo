@@ -1,0 +1,261 @@
+/* src/components/BottomRow.css
+   Row three of the dashboard grid: the pipeline health card takes 4
+   columns, and the three slim cards share the other 8. Colours come from
+   styles.css.
+
+   Each group holds its own popover. The group is the positioning parent,
+   so the popover opens above it. Below 900px wide the popover becomes a
+   sheet fixed to the bottom of the screen, so it is always on screen. */
+
+.bottom__health,
+.bottom__cards {
+  position: relative;
+  min-width: 0;
+}
+
+.bottom__health {
+  grid-column: span 4;
+  display: flex;
+}
+
+.bottom__cards {
+  grid-column: span 8;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ---- pipeline health ---- */
+.panel.health {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.55rem 0.95rem 0.75rem;
+}
+
+.health__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.health__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.health__sub {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.health__grid {
+  display: grid;
+  grid-template-columns: repeat(30, minmax(0, 1fr));
+  gap: 3px;
+  height: 20px;
+  margin-top: 0.25rem;
+}
+
+.cell {
+  border-radius: 2px;
+  background: var(--ink-soft);
+  cursor: default;
+}
+
+.cell--success {
+  background: #0F6E4C;
+}
+
+/* Stripes mark a failed run, so the meaning is not only the colour. */
+.cell--failed {
+  background: repeating-linear-gradient(45deg, #B23A2B 0 2px, #F3C9C2 2px 4px);
+}
+
+.cell--running {
+  background: var(--rule);
+}
+
+.cell--none {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+/* ---- slim cards ---- */
+.slim {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.7rem 0.95rem;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.slim:hover {
+  border-color: var(--ink-soft);
+}
+
+.slim[aria-expanded='true'] {
+  border-color: var(--ink);
+}
+
+.slim:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.slim__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.slim__label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.slim__plus {
+  font-family: var(--mono);
+  color: var(--ink-soft);
+}
+
+.slim__hint {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ---- popover ---- */
+.pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  z-index: 30;
+  width: min(40rem, 100%);
+  max-height: min(70vh, 32rem);
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(22, 35, 46, 0.24);
+  outline: none;
+}
+
+.pop--left {
+  left: 0;
+  width: min(34rem, calc(100vw - 2.5rem));
+}
+
+.pop--right {
+  right: 0;
+}
+
+.pop__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0.7rem 0.6rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.pop__title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.pop__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pop__close:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.pop__close:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+/* The content panels are written as boxes. Inside the popover they are
+   flattened so there is no box inside a box. */
+.pop__body {
+  overflow-y: auto;
+  padding: 0.3rem 1.25rem 1.25rem;
+}
+
+.pop__body .panel {
+  border: none;
+  border-radius: 0;
+  padding: 0.2rem 0 1.1rem;
+  margin-top: 0;
+}
+
+.pop__body .panel+.panel {
+  border-top: 1px solid var(--rule);
+  padding-top: 1.2rem;
+}
+
+.pop__body .panel:last-child {
+  padding-bottom: 0;
+}
+
+.pop__body .uses,
+.pop__body .limits {
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 900px) {
+
+  .bottom__health,
+  .bottom__cards {
+    grid-column: 1 / -1;
+  }
+
+  /* A sheet at the bottom of the screen. */
+  .pop,
+  .pop--left {
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    width: auto;
+    max-height: 75vh;
+  }
+}
+
+@media (max-width: 560px) {
+  .bottom__cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .health__grid {
+    height: 24px;
+  }
+}

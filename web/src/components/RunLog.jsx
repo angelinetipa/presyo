@@ -1,6 +1,6 @@
 // src/components/RunLog.jsx
 // Recent pipeline runs, failed ones included.
-// Shown inside the "Health log" fold. A log that only lists successes
+// Shown inside the "Health log" popover, opened from the pipeline health card. A log that only lists successes
 // cannot tell a dead pipeline from one that has not run yet.
 //
 // Start times are real moments, so they show in the viewer's local time.

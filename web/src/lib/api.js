@@ -73,8 +73,8 @@ export function fetchRates() {
   return get('fx_rates?select=rate_date,currency,php_per_unit&order=rate_date.asc');
 }
 
-/** The last few pipeline runs, newest first. */
-export function fetchRuns(limit = 6) {
+/** The last 30 pipeline runs, newest first. The header shows the newest 6. */
+export function fetchRuns(limit = 30) {
   return get(
     'pipeline_runs?select=started_at,status,rows_read,rows_loaded,rows_rejected'
     + `&order=started_at.desc&limit=${limit}`,

@@ -1,6 +1,6 @@
 // src/components/Limits.jsx
 // What the page will not tell you, and why.
-// Shown inside the "Limits" fold.
+// Shown inside the "Limits" popover.
 //
 // The page does not say when to send money. A short record of midpoint
 // rates cannot forecast anything, the midpoint is not what a counter

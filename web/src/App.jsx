@@ -5,10 +5,14 @@
 //   Row one        rate board (4 columns), then the KPI tiles over the
 //                  chart (8 columns)
 //   Row two        budget planner (8 columns), savings calculator (4)
-//   Bottom         slim folds with the reading material
+//   Row three      pipeline health grid (4 columns), then three slim cards
+//                  that open the reading material in a popover (8)
 //
 // The dark panels, the board and the calculator, sit on one diagonal.
 // Below 900px wide every panel takes the full width, in the same order.
+//
+// The header dots show the newest 6 runs. The tiles and the health grid use
+// all the runs that were fetched.
 //
 // The selected currency is held here, so the KPI tiles and the chart
 // always show the same one.
@@ -21,7 +25,8 @@ import KpiTiles from './components/KpiTiles';
 import RateChart from './components/RateChart';
 import Plan from './components/Plan';
 import RunDots from './components/RunDots';
-import AboutStrip from './components/AboutStrip';
+import RunGrid from './components/RunGrid';
+import AboutCards from './components/AboutCards';
 import { formatDay } from './lib/format';
 
 export default function App() {
@@ -61,7 +66,7 @@ export default function App() {
               <span className="beat__dot" aria-hidden="true" />
               Last check {lastRun.status === 'success' ? 'succeeded' : 'failed'}
             </p>
-            <RunDots runs={runs} />
+            <RunDots runs={runs.slice(0, 6)} />
           </div>
         )}
       </header>
@@ -99,14 +104,11 @@ export default function App() {
           </div>
 
           <Plan series={data.series} latest={data.latest} lastDate={data.lastDate} />
+
+          <RunGrid runs={runs} />
+          <AboutCards days={data.days} since={formatDay(data.series[0].date, 'long')} />
         </div>
       )}
-
-      <AboutStrip
-        runs={runs}
-        days={data?.days ?? 0}
-        since={data?.days ? formatDay(data.series[0].date, 'long') : ''}
-      />
 
       <footer className="foot">
         Rates from open.er-api.com · Built by{' '}

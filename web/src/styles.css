@@ -54,7 +54,7 @@ a:hover {
 .wrap {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
+  padding: 1rem 1.25rem 2rem;
 }
 
 /* ---- header -------------------------------------------------------- */
@@ -64,11 +64,11 @@ a:hover {
   align-items: flex-end;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.8rem;
 }
 
 .logo {
-  font-size: clamp(2.2rem, 6vw, 3rem);
+  font-size: clamp(1.9rem, 5vw, 2.4rem);
   font-weight: 800;
   letter-spacing: -0.045em;
   margin: 0;
@@ -76,7 +76,7 @@ a:hover {
 }
 
 .tagline {
-  margin: 0.4rem 0 0;
+  margin: 0.25rem 0 0;
   color: var(--ink-soft);
   font-size: 0.95rem;
 }
@@ -185,7 +185,7 @@ a:hover {
   grid-template-columns: 3rem minmax(0, 1fr) 5rem;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.2rem 1.1rem;
+  padding: 0.12rem 1.1rem;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   animation: lift 480ms cubic-bezier(.2, .7, .3, 1) backwards;
@@ -356,7 +356,7 @@ a:hover {
 }
 
 .foot {
-  margin-top: 2.5rem;
+  margin-top: 1.5rem;
   text-align: center;
   color: var(--ink-soft);
   font-size: 0.78rem;
@@ -1110,87 +1110,6 @@ a:hover {
   margin-top: 0.4rem;
 }
 
-/* ---- reading material folds ---------------------------------------------------------
-   Native <details> elements in one card. Closed, each is a single line
-   with a short hint. Open, the original panels show inside, flattened so
-   there is no box inside a box. */
-.folds {
-  margin-top: 1.25rem;
-  background: var(--card);
-  border: 1px solid var(--rule);
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.fold+.fold {
-  border-top: 1px solid var(--rule);
-}
-
-.fold summary {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9rem;
-  padding: 0.9rem 1.25rem;
-  cursor: pointer;
-  list-style: none;
-}
-
-.fold summary::-webkit-details-marker {
-  display: none;
-}
-
-.fold summary::after {
-  content: '+';
-  margin-left: auto;
-  font-family: var(--mono);
-  color: var(--ink-soft);
-}
-
-.fold[open] summary::after {
-  content: '\2013';
-}
-
-.fold summary:hover {
-  background: var(--paper);
-}
-
-.fold__label {
-  font-size: 0.92rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.fold__hint {
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-}
-
-.fold__body {
-  padding: 0 1.25rem 1.25rem;
-}
-
-.fold__body .panel {
-  border: none;
-  border-radius: 0;
-  padding: 0.2rem 0 1.1rem;
-  margin-top: 0;
-}
-
-.fold__body .panel+.panel {
-  border-top: 1px solid var(--rule);
-  padding-top: 1.2rem;
-}
-
-.fold__body .panel:last-child {
-  padding-bottom: 0;
-}
-
-/* The fold label already acts as the title, so lists start close to the top. */
-.fold__body .uses,
-.fold__body .limits {
-  margin-top: 0.3rem;
-}
-
 /* ---- small screens ---------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .dash {
@@ -1266,15 +1185,6 @@ a:hover {
     text-align: left;
   }
 
-  .fold summary {
-    flex-wrap: wrap;
-    row-gap: 0.1rem;
-  }
-
-  .fold__hint {
-    flex-basis: 100%;
-    order: 3;
-  }
 }
 
 @media (max-width: 340px) {

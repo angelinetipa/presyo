@@ -1,6 +1,6 @@
 // src/components/Source.jsx
 // Where the numbers come from and how they get to the page.
-// Shown inside the "How it works" fold, so it has no title of its own.
+// Shown inside the "How it works" popover, so it has no title of its own.
 // The attribution is also required by the provider's terms.
 
 export default function Source() {
