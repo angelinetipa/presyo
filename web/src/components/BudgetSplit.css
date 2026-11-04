@@ -1,20 +1,188 @@
 /* src/components/BudgetSplit.css
-   The headline under the section title. Colours and spacing come from
-   styles.css. */
+   The compact budget planner. It has to fit the 8 column box in the
+   dashboard grid, so spacing and control sizes are smaller here than the
+   shared defaults in styles.css. Every rule is scoped under .budget.
+   Colours come from styles.css.
 
-.budget__result {
-  margin: 0 0 1rem;
-  padding-top: 0.9rem;
+   The phone rules at the bottom put the larger sizes back. Inputs need a
+   16px font on phones, or the browser zooms in when one is tapped. */
+
+.panel.budget {
+  padding: 0.85rem 1.1rem 0.9rem;
+}
+
+.budget .panel__head {
+  flex-wrap: nowrap;
+  margin-bottom: 0.65rem;
+}
+
+.budget .panel__sub {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+}
+
+.budget .panel__actions {
+  gap: 0.8rem;
+  flex: none;
+}
+
+/* Income, rate, and what the income is worth in pesos. */
+.budget .budget__top {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 0.7rem;
+}
+
+.budget .field {
+  gap: 0.25rem;
+}
+
+.budget .field__label {
+  min-height: 1rem;
+  font-size: 0.64rem;
+  white-space: nowrap;
+}
+
+.budget .field__tag {
+  padding: 0 0.35rem;
+  font-size: 0.62rem;
+}
+
+.budget .field__label .linkbtn {
+  font-size: 0.72rem;
+}
+
+.budget .field__input,
+.budget .brow__label,
+.budget .joined input,
+.budget .joined select {
+  padding: 0.32rem 0.6rem;
+  font-size: 0.88rem;
+}
+
+.budget__php {
+  margin: 0;
+  padding: 0.12rem 0;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.budget .sbar {
+  height: 10px;
+  margin-bottom: 0.45rem;
+}
+
+/* Rows. */
+.budget .brow {
+  gap: 0.6rem;
+  padding: 0.22rem 0;
+}
+
+.budget .brow__php {
+  font-size: 0.98rem;
+}
+
+.budget .brow__src {
+  font-size: 0.66rem;
+  line-height: 1.25;
+}
+
+.budget .brow__lock,
+.budget .brow__remove {
+  height: 26px;
+}
+
+/* One line: add button, ready made splits, and the message. */
+.budget__foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.7rem;
+  margin-top: 0.3rem;
+  padding-top: 0.55rem;
   border-top: 1px solid var(--rule);
 }
 
-.budget__headline {
+.budget .addbtn {
+  padding: 0.28rem 0.65rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.budget .presets {
   margin: 0;
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  font-size: clamp(1.15rem, 3.4vw, 1.55rem);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  overflow-wrap: anywhere;
+  gap: 0.3rem;
+  flex: none;
+}
+
+.budget .presets__label {
+  margin-right: 0;
+  font-size: 0.62rem;
+}
+
+.budget .chip {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+}
+
+.budget .notice {
+  flex: 1 1 9rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 900px) {
+  .budget .budget__top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .budget__worth {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .panel.budget {
+    padding: 1rem 0.95rem;
+  }
+
+  .budget .panel__head {
+    flex-wrap: wrap;
+  }
+
+  .budget .field__input,
+  .budget .brow__label,
+  .budget .joined input,
+  .budget .joined select {
+    padding: 0.45rem 0.65rem;
+    font-size: 1rem;
+  }
+
+  .budget .brow {
+    padding: 0.6rem 0;
+  }
+
+  /* The chips take their own line and wrap instead of running off the panel. */
+  .budget .presets {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+  }
+
+  .budget .brow__php {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .budget .budget__top {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

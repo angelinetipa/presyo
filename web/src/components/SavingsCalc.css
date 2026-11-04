@@ -1,23 +1,27 @@
 /* src/components/SavingsCalc.css
    The savings calculator. It reuses the colours from styles.css (the rate
    board palette) and the shared field and joined controls, recoloured for
-   a dark background. Everything is scoped under .savecalc. */
+   a dark background. Everything is scoped under .savecalc.
+
+   It has to fit the 4 column box in the dashboard grid, so spacing and
+   control sizes are smaller than the shared defaults. The phone rules at
+   the bottom put the larger input font back, because phones zoom in on
+   inputs under 16px. */
 
 .savecalc {
   background: var(--board);
   color: #FFFFFF;
   border-radius: 14px;
   box-shadow: 0 14px 34px rgba(22, 35, 46, 0.22);
-  padding: 1.3rem 1.4rem 1.1rem;
+  padding: 0.85rem 1rem 0.8rem;
 }
 
 .savecalc__head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .savecalc__title {
@@ -28,35 +32,30 @@
 }
 
 .savecalc__sub {
-  margin: 0.3rem 0 0;
+  margin: 0.15rem 0 0;
   color: #8FA0AD;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
 }
 
-/* The mode choice and the info button sit together on the right. */
-.savecalc__tools {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-/* Two choices, one selected. */
+/* Two choices, one selected. They share the full width. */
 .seg {
-  display: inline-flex;
+  display: flex;
   padding: 3px;
+  margin-bottom: 0.65rem;
   border: 1px solid var(--board-rule);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
 }
 
 .seg button {
+  flex: 1 1 0;
   border: none;
   background: none;
   color: #B9C4CC;
   font-family: var(--sans);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  padding: 0.4rem 0.85rem;
+  padding: 0.28rem 0.6rem;
   border-radius: 999px;
   cursor: pointer;
   white-space: nowrap;
@@ -70,12 +69,19 @@
 .savecalc__fields {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0.9rem;
-  margin-bottom: 1.1rem;
+  gap: 0.6rem;
+  margin-bottom: 0.65rem;
 }
 
-/* Shared controls, recoloured for the dark panel. */
+/* Shared controls, recoloured and made smaller for the dark panel. */
+.savecalc .field {
+  gap: 0.25rem;
+}
+
 .savecalc .field__label {
+  min-height: 1rem;
+  font-size: 0.64rem;
+  white-space: nowrap;
   color: #8FA0AD;
 }
 
@@ -86,10 +92,14 @@
 
 .savecalc .joined input,
 .savecalc .joined select {
+  padding: 0.32rem 0.6rem;
+  font-size: 0.88rem;
   color: #FFFFFF;
 }
 
 .savecalc .joined select {
+  padding-left: 0.4rem;
+  padding-right: 0.2rem;
   border-left-color: var(--board-rule);
 }
 
@@ -105,10 +115,10 @@
 .joined__unit {
   display: flex;
   align-items: center;
-  padding: 0 0.7rem;
+  padding: 0 0.6rem;
   border-left: 1px solid var(--board-rule);
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   color: #8FA0AD;
 }
 
@@ -120,80 +130,97 @@
   color: #FFFFFF;
 }
 
-/* The answer. */
+/* The answer. The figure and its description share a line when they fit. */
 .savecalc__result {
-  padding: 1rem 0 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.6rem;
+  padding: 0.6rem 0 0.2rem;
   border-top: 1px solid var(--board-rule);
 }
 
 .savecalc__kicker {
+  flex-basis: 100%;
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: #8FA0AD;
 }
 
 .savecalc__big {
-  margin: 0.3rem 0 0.2rem;
+  margin: 0.1rem 0 0;
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
-  font-size: clamp(1.9rem, 6vw, 2.6rem);
+  font-size: clamp(1.5rem, 5vw, 1.9rem);
   font-weight: 500;
-  line-height: 1.1;
+  line-height: 1.15;
   color: var(--digit);
   overflow-wrap: anywhere;
 }
 
 .savecalc__line {
-  margin: 0.25rem 0 0;
+  margin: 0.15rem 0 0;
   color: #B9C4CC;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
-/* The fixed lengths of time, like lines on the rate board. */
+.savecalc__result .savecalc__line {
+  margin: 0;
+}
+
+/* The fixed lengths of time, in two columns like lines on the rate board. */
 .savecalc__rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1rem;
   list-style: none;
-  margin: 0.8rem 0 0;
+  margin: 0.4rem 0 0;
   padding: 0;
-  border-top: 1px solid var(--board-rule);
 }
 
 .savecalc__row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid var(--board-rule);
+  gap: 0.5rem;
+  padding: 0.28rem 0;
+  border-top: 1px solid var(--board-rule);
   animation: lift 480ms cubic-bezier(.2, .7, .3, 1) backwards;
   animation-delay: calc(var(--i) * 55ms);
 }
 
 .savecalc__row span:first-child {
   color: #B9C4CC;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
 }
 
 .savecalc__row span:last-child {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
-  font-size: 1.05rem;
+  font-size: 0.86rem;
   color: var(--digit);
 }
 
 /* Goal mode: how much of the needed monthly amount is covered. */
 .savecalc__compare {
-  margin-top: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.savecalc__compare .savecalc__line {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
 }
 
 .meter {
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
-  margin: 0.2rem 0 0.5rem;
+  margin: 0.1rem 0 0.35rem;
 }
 
 .meter__fill {
@@ -209,36 +236,33 @@
 }
 
 .savecalc__compare .linkbtn {
-  margin-top: 0.6rem;
+  margin-top: 0.4rem;
+  font-size: 0.76rem;
 }
 
 .savecalc__warn {
-  margin: 0.8rem 0 0;
+  margin: 0.5rem 0 0;
   color: var(--down);
-  font-size: 0.84rem;
+  font-size: 0.78rem;
 }
 
 @media (max-width: 560px) {
   .savecalc {
-    padding: 1.1rem 1rem 0.9rem;
+    padding: 1rem 0.95rem 0.9rem;
   }
 
   .savecalc__fields {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .savecalc__tools {
-    width: 100%;
+  .savecalc .joined input,
+  .savecalc .joined select {
+    padding: 0.45rem 0.65rem;
+    font-size: 1rem;
   }
 
-  .seg {
-    flex: 1 1 auto;
-  }
-
-  .seg button {
-    flex: 1 1 0;
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
+  .savecalc__row {
+    padding: 0.4rem 0;
   }
 }
 

@@ -1,5 +1,6 @@
 // src/components/SavingsCalc.jsx
 // The savings calculator. A dark panel in the style of the rate board.
+// It is kept short so it fits its 4 column box in the dashboard grid.
 //
 // It is linked to the Savings row of the budget (see lib/savingsLink.js).
 // The monthly amount here is that row. Change it here and the budget
@@ -115,24 +116,23 @@ export default function SavingsCalc({ budget }) {
       <header className="savecalc__head">
         <div>
           <h2 className="savecalc__title">Savings calculator</h2>
-          <p className="savecalc__sub">See how much your savings add up to over days, months or years.</p>
+          <p className="savecalc__sub">See how your savings add up over time.</p>
         </div>
-        <div className="savecalc__tools">
-          <div className="seg" role="group" aria-label="What do you want to find out">
-            <button type="button" aria-pressed={mode === 'save'} onClick={() => setMode('save')}>
-              I save this much
-            </button>
-            <button type="button" aria-pressed={mode === 'goal'} onClick={() => setMode('goal')}>
-              I have a goal
-            </button>
-          </div>
-          <InfoTip tone="dark" label="About the link to the budget">
-            {linked
-              ? 'Linked to the Savings row in the budget. Change the savings here and the budget follows. Change the Savings row in the budget and this follows.'
-              : 'Not linked. Add a row named Savings to the budget to link this calculator to it.'}
-          </InfoTip>
-        </div>
+        <InfoTip tone="dark" label="About the link to the budget">
+          {linked
+            ? 'Linked to the Savings row in the budget. Change the savings here and the budget follows. Change the Savings row in the budget and this follows.'
+            : 'Not linked. Add a row named Savings to the budget to link this calculator to it.'}
+        </InfoTip>
       </header>
+
+      <div className="seg" role="group" aria-label="What do you want to find out">
+        <button type="button" aria-pressed={mode === 'save'} onClick={() => setMode('save')}>
+          I save this much
+        </button>
+        <button type="button" aria-pressed={mode === 'goal'} onClick={() => setMode('goal')}>
+          I have a goal
+        </button>
+      </div>
 
       {mode === 'save' ? (
         <>

@@ -2,7 +2,9 @@
 // A row of ready made splits. Picking one replaces the rows. The income
 // and currency stay as they are, and every value can still be edited.
 //
-// The chip that matches the current rows is marked as selected.
+// The chip that matches the current rows is marked as selected. The spaces
+// are dropped from the chip text (60/30/10) so the chips stay narrow. The
+// button name read by a screen reader still lists every row.
 
 import { PRESETS } from '../constants/budget';
 
@@ -34,7 +36,7 @@ export default function BudgetPresets({ rows, onPick }) {
             aria-label={p.rows.map(([label, value]) => `${label} ${value}`).join(', ')}
             onClick={() => onPick(p)}
           >
-            {p.name}
+            {p.name.replace(/ /g, '')}
           </button>
         );
       })}
