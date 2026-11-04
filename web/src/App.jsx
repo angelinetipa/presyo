@@ -1,16 +1,23 @@
 // src/App.jsx
-// One dashboard, no tabs. It reads left to right, top to bottom.
+// One dashboard, no tabs. A 12 column grid with a 12px gap.
 //
 //   Header         title, last check, and a dot for each recent run
-//   Row one        rate board (left), chart (right)
-//   Row two        plan section (budget split), full width
+//   Row one        rate board (4 columns), then the KPI tiles over the
+//                  chart (8 columns)
+//   Row two        budget planner (8 columns), savings calculator (4)
 //   Bottom         slim folds with the reading material
 //
-// Below 900px wide the columns stack in the same order.
+// The dark panels, the board and the calculator, sit on one diagonal.
+// Below 900px wide every panel takes the full width, in the same order.
+//
+// The selected currency is held here, so the KPI tiles and the chart
+// always show the same one.
 
 import { useEffect, useState } from 'react';
 import { fetchRates, fetchRuns, shape } from './lib/api';
+import { defaultCurrency } from './lib/rank';
 import Board from './components/Board';
+import KpiTiles from './components/KpiTiles';
 import RateChart from './components/RateChart';
 import Plan from './components/Plan';
 import RunDots from './components/RunDots';
@@ -21,6 +28,7 @@ export default function App() {
   const [data, setData] = useState(null);
   const [runs, setRuns] = useState([]);
   const [error, setError] = useState(null);
+  const [picked, setPicked] = useState(null);
 
   useEffect(() => {
     Promise.all([fetchRates(), fetchRuns()])
@@ -33,6 +41,10 @@ export default function App() {
 
   const lastRun = runs[0];
   const ready = data && data.days > 0;
+
+  // A picked currency that has no data falls back to the default.
+  const currency = ready ? (data.latest[picked] ? picked : defaultCurrency(data.latest)) : null;
+  const since = ready ? formatDay(data.series[0].date, 'medium') : '';
 
   return (
     <main className="wrap">
@@ -72,22 +84,21 @@ export default function App() {
 
       {ready && (
         <div className="dash">
-          <div className="dash__left">
-            <Board latest={data.latest} lastDate={data.lastDate} />
-            <p className="coverage">
-              <strong>{data.days}</strong> days recorded, without anyone touching it, since{' '}
-              {formatDay(data.series[0].date, 'long')}
-              .
-            </p>
+          <div className="dash__board">
+            <Board latest={data.latest} lastDate={data.lastDate} days={data.days} since={since} />
           </div>
 
-          <div className="dash__right">
-            <RateChart series={data.series} latest={data.latest} />
+          <div className="dash__main">
+            <KpiTiles series={data.series} currency={currency} runs={runs} />
+            <RateChart
+              series={data.series}
+              latest={data.latest}
+              currency={currency}
+              onCurrency={setPicked}
+            />
           </div>
 
-          <div className="dash__wide">
-            <Plan series={data.series} latest={data.latest} lastDate={data.lastDate} />
-          </div>
+          <Plan series={data.series} latest={data.latest} lastDate={data.lastDate} />
         </div>
       )}
 

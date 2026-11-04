@@ -1,8 +1,27 @@
 /* src/components/Plan.css
-   The planning section stacks its panels with an even gap. */
+   The planning section has no box of its own. display: contents lets
+   its two panels sit directly in the dashboard grid (see styles.css):
+   the budget planner takes 8 columns and the savings calculator takes 4.
+   Below 900px wide each takes the full width. */
 
 .plan {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  display: contents;
+}
+
+.plan>.budget {
+  grid-column: span 8;
+  min-width: 0;
+}
+
+.plan>.savecalc {
+  grid-column: span 4;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+
+  .plan>.budget,
+  .plan>.savecalc {
+    grid-column: 1 / -1;
+  }
 }

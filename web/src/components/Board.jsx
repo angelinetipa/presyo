@@ -4,7 +4,11 @@
 // points line up.
 //
 // Rows are ranked by pesos per unit, highest first, using rankCurrencies.
-// Figures use tabular-nums so a changing digit does not shift the column.
+// Each row is one line so the board stays short. The country is kept as a
+// hover title and as hidden text for screen readers. Figures use
+// tabular-nums so a changing digit does not shift the column.
+//
+// days and since describe the recorded data and fill the footer line.
 
 import { colors, CURRENCY_NOTE } from '../constants/theme';
 import { rankCurrencies } from '../lib/rank';
@@ -24,7 +28,7 @@ function Delta({ pct }) {
   );
 }
 
-export default function Board({ latest, lastDate }) {
+export default function Board({ latest, lastDate, days, since }) {
   const shown = rankCurrencies(latest);
 
   return (
@@ -43,15 +47,23 @@ export default function Board({ latest, lastDate }) {
         {shown.map((currency, i) => {
           const row = latest[currency];
           return (
-            <li key={currency} className="board__row" style={{ '--i': i }}>
-              <span className="board__code">{currency}</span>
-              <span className="board__note">{CURRENCY_NOTE[currency]}</span>
+            <li key={currency} className="board__row" style={{ '--i': i }} title={CURRENCY_NOTE[currency]}>
+              <span className="board__code">
+                {currency}
+                <span className="sr-only"> {CURRENCY_NOTE[currency]}</span>
+              </span>
               <span className="board__value">{row.value.toFixed(4)}</span>
               <span className="board__delta"><Delta pct={row.dayChange} /></span>
             </li>
           );
         })}
       </ol>
+
+      {days > 0 && (
+        <footer className="board__foot">
+          <strong>{days}</strong> days recorded on its own since {since}.
+        </footer>
+      )}
     </section>
   );
 }

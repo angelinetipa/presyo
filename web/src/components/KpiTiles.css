@@ -1,0 +1,94 @@
+/* src/components/KpiTiles.css
+   The four tiles above the chart. Colours come from styles.css.
+   Green and red are the darker tones used on light backgrounds, the
+   same ones as the status dots in the header. */
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+
+.kpi dt,
+.kpi dd {
+  margin: 0;
+}
+
+.kpi__label {
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+.kpi__value {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.kpi__foot {
+  min-height: 1rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.kpi__up {
+  color: #0F6E4C;
+}
+
+.kpi__down {
+  color: #B23A2B;
+}
+
+.kpi__flat {
+  color: var(--ink-soft);
+}
+
+/* Where today sits between the low and the high. */
+.kpi__track {
+  display: block;
+  position: relative;
+  height: 4px;
+  margin: 0.4rem 5px 0.2rem;
+  border-radius: 999px;
+  background: var(--rule);
+}
+
+.kpi__mark {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--digit);
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 560px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}

@@ -1,23 +1,25 @@
 // src/components/RateChart.jsx
-// One currency at a time, in pesos, with the finding written as the title.
+// One currency at a time, in pesos.
 //
-// Reading order: headline, context line, currency switch, chart, note.
+// The selected currency is held by the page (see App.jsx), so the KPI
+// tiles and the chart always show the same currency.
+//
+// Reading order: title and currency switch, chart, with the reading notes
+// in the info button. The finding (today, change, range) is in the tiles.
 //
 // Declutter rules applied here:
 //   no gridlines, no tick marks, no legend
 //   the low, the high, and today are labelled on the line itself
-//   the y axis does not start at zero, and a note says so
+//   the y axis does not start at zero, and the info button says so
 //
 // Each currency sits on a very different scale, so they share no axis.
-// Buttons follow the board order, highest peso value first, and the
-// chart starts on USD.
+// Buttons follow the board order, highest peso value first.
 
-import { useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ReferenceDot, ResponsiveContainer,
 } from 'recharts';
 import { colors } from '../constants/theme';
-import { rankCurrencies, defaultCurrency } from '../lib/rank';
+import { rankCurrencies } from '../lib/rank';
 import { formatDay } from '../lib/format';
 import InfoTip from './InfoTip';
 
@@ -31,21 +33,13 @@ const shortDate = (iso) => formatDay(iso);
 const fmt = (v) => (v < 1 ? v.toFixed(4) : v.toFixed(2));
 const fmtAxis = (v) => (v < 1 ? v.toFixed(3) : v.toFixed(2));
 
-function headline(currency, now, move, since) {
-  const base = `One ${currency} is ${PESO}${fmt(now)}`;
-  if (move == null) return base;
-  if (Math.abs(move) < 0.05) return `${base}, about the same as on ${since}`;
-  return `${base}, ${move > 0 ? 'up' : 'down'} ${Math.abs(move).toFixed(2)}% since ${since}`;
-}
-
-export default function RateChart({ series, latest }) {
+export default function RateChart({ series, latest, currency, onCurrency }) {
   const available = rankCurrencies(latest);
-  const [active, setActive] = useState(defaultCurrency(latest));
+  const active = currency;
 
   const points = series.filter((d) => d[active] != null);
   if (points.length === 0) return null;
 
-  const values = points.map((d) => d[active]);
   const first = points[0];
   const last = points[points.length - 1];
   const low = points.reduce((m, p) => (p[active] < m[active] ? p : m), first);
@@ -55,7 +49,6 @@ export default function RateChart({ series, latest }) {
   const domain = [low[active] - pad, high[active] + pad];
 
   const since = shortDate(first.date);
-  const move = points.length > 1 ? latest[active]?.sinceStart ?? null : null;
   const early = points.length < SHORT_RECORD;
 
   // Label the low and the high only when they are real points of interest:
@@ -65,47 +58,52 @@ export default function RateChart({ series, latest }) {
   const lastIndex = points.length - 1;
   const farFromToday = (point) => lastIndex - points.indexOf(point) >= 3;
   const marks = [];
-  if (spread && farFromToday(low)) marks.push({ key: 'low', point: low, text: `Low ${fmt(low[active])}`, position: 'bottom', fill: colors.down });
+  // The low label sits beside its dot, toward the middle of the chart, so it
+  // does not run into the y axis numbers or the date labels.
+  const lowSide = points.indexOf(low) < points.length / 2 ? 'right' : 'left';
+  if (spread && farFromToday(low)) marks.push({ key: 'low', point: low, text: `Low ${fmt(low[active])}`, position: lowSide, fill: colors.down });
   if (spread && farFromToday(high)) marks.push({ key: 'high', point: high, text: `High ${fmt(high[active])}`, position: 'top', fill: colors.up });
 
   return (
-    <section className="panel">
-      <h2 className="panel__title">{headline(active, last[active], move, since)}</h2>
-      <p className="panel__sub">
-        {early
-          ? `Only ${points.length} days recorded for ${active}, since ${since}. Too early to call a trend.`
-          : `${points.length} days recorded for ${active}, since ${since}.`}
-      </p>
-
-      <div className="panel__head" style={{ marginTop: '0.9rem' }}>
-        <div className="switch" role="group" aria-label="Choose a currency">
-          {available.map((c) => (
-            <button
-              key={c}
-              onClick={() => setActive(c)}
-              aria-pressed={c === active}
-              className={c === active ? 'switch__btn switch__btn--on' : 'switch__btn'}
-            >
-              {c}
-            </button>
-          ))}
+    <section className="panel chart">
+      <div className="chart__head">
+        <h2 className="panel__title">One {active} in pesos</h2>
+        <div className="chart__tools">
+          <div className="switch" role="group" aria-label="Choose a currency">
+            {available.map((c) => (
+              <button
+                key={c}
+                onClick={() => onCurrency(c)}
+                aria-pressed={c === active}
+                className={c === active ? 'switch__btn switch__btn--on' : 'switch__btn'}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <InfoTip label="How to read this chart">
+            The amber dot is today. Up means one {active} buys more pesos. The scale does not
+            start at zero, so small moves look bigger than they are.
+          </InfoTip>
         </div>
-        <InfoTip label="How to read this chart">
-          The amber dot is today. Up means one {active} buys more pesos. The scale does not
-          start at zero, so small moves look bigger than they are.
-        </InfoTip>
       </div>
+
+      {early && (
+        <p className="panel__sub chart__early">
+          Only {points.length} days recorded for {active}, since {since}. Too early to call a trend.
+        </p>
+      )}
 
       <div className="chart__box">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={points} margin={{ top: 22, right: 48, bottom: 4, left: 0 }}>
+          <LineChart data={points} margin={{ top: 18, right: 44, bottom: 0, left: 0 }}>
             <XAxis
               dataKey="date" tickFormatter={shortDate} minTickGap={42}
               tick={{ fontSize: 11, fill: colors.inkSoft }}
               axisLine={{ stroke: colors.rule }} tickLine={false}
             />
             <YAxis
-              domain={domain} width={48} tickCount={4}
+              domain={domain} width={48} tickCount={3}
               tickFormatter={fmtAxis}
               tick={{ fontSize: 11, fill: colors.inkSoft }}
               axisLine={false} tickLine={false}
