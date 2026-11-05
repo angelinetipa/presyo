@@ -9,10 +9,10 @@
 //
 // The first three follow the selected currency. The runs tile does not.
 // Colour is never the only signal. Every change also has an arrow and
-// a number.
+// a number. Hovering a rate or a change shows its exact digits.
 
 import { rateKpis, runKpis } from '../lib/kpis';
-import { formatDay } from '../lib/format';
+import { formatDay, formatPercentExact, formatRateExact } from '../lib/format';
 import './KpiTiles.css';
 
 const PESO = '₱';
@@ -28,14 +28,15 @@ function trend(pct) {
     tone: flat ? 'flat' : pct > 0 ? 'up' : 'down',
     mark: flat ? '–' : pct > 0 ? '▲' : '▼',
     text: `${Math.abs(pct).toFixed(2)}%`,
+    exact: formatPercentExact(pct),
   };
 }
 
-function Tile({ label, value, foot }) {
+function Tile({ label, value, foot, title }) {
   return (
     <div className="kpi">
       <dt className="kpi__label">{label}</dt>
-      <dd className="kpi__value">{value}</dd>
+      <dd className="kpi__value" title={title}>{value}</dd>
       <dd className="kpi__foot">{foot}</dd>
     </div>
   );
@@ -55,10 +56,11 @@ export default function KpiTiles({ series, currency, runs }) {
       <Tile
         label="Today"
         value={`${PESO}${fmt(rate.value)}`}
+        title={`1 ${currency} is ${PESO}${formatRateExact(rate.value)}`}
         foot={
           day ? (
             <>
-              <span className={`kpi__${day.tone}`}>{day.mark} {day.text}</span> on the day
+              <span className={`kpi__${day.tone}`} title={day.exact}>{day.mark} {day.text}</span> on the day
             </>
           ) : (
             'First day recorded'
@@ -71,12 +73,14 @@ export default function KpiTiles({ series, currency, runs }) {
         value={
           <span className={`kpi__${since.tone}`}>{since.mark} {since.text}</span>
         }
+        title={`${since.exact} since the first day`}
         foot={rate.days > 1 ? `over ${rate.days} days` : 'First day only'}
       />
 
       <Tile
         label="Low to high"
         value={`${fmt(rate.low.value)} to ${fmt(rate.high.value)}`}
+        title={`Low ${PESO}${formatRateExact(rate.low.value)}, high ${PESO}${formatRateExact(rate.high.value)}`}
         foot={
           position == null ? (
             'No range yet'

@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PERIODS, projectSavings, toMonths, monthlyNeeded, monthsToReach, describeMonths,
+  PERIODS, projectSavings, toMonths, monthlyNeeded, monthlyToReach, monthsToReach, describeMonths,
 } from './savings.js';
 
 const totalFor = (rows, id) => rows.find((r) => r.id === id).total;
@@ -35,6 +35,14 @@ test('days, months and years convert to months', () => {
 test('the monthly amount needed for a goal', () => {
   assert.equal(monthlyNeeded(120000, 12), 10000);
   assert.equal(monthlyNeeded(120000, toMonths(2, 'years')), 5000);
+});
+
+test('the monthly amount rounds up to the centavo so the goal is reached', () => {
+  assert.equal(monthlyToReach(100000, 12), 8333.34);
+  assert.equal(monthlyToReach(120000, 12), 10000);
+  assert.equal(monthlyToReach(100000, 3), 33333.34);
+  assert.equal(monthlyToReach(0, 12), 0);
+  assert.equal(monthlyToReach(100000, 0), 0);
 });
 
 test('no time or no goal gives a monthly amount of 0', () => {

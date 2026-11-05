@@ -6,13 +6,15 @@
 // Rows are ranked by pesos per unit, highest first, using rankCurrencies.
 // Each row is one line so the board stays short. The country is kept as a
 // hover title and as hidden text for screen readers. Figures use
-// tabular-nums so a changing digit does not shift the column.
+// tabular-nums so a changing digit does not shift the column. Hovering a
+// figure shows the exact stored rate, and hovering a change shows its exact
+// percent.
 //
 // days and since describe the recorded data and fill the footer line.
 
 import { colors, CURRENCY_NOTE } from '../constants/theme';
 import { rankCurrencies } from '../lib/rank';
-import { formatDay } from '../lib/format';
+import { formatDay, formatPercentExact, formatRateExact } from '../lib/format';
 import InfoTip from './InfoTip';
 
 function Delta({ pct }) {
@@ -22,7 +24,7 @@ function Delta({ pct }) {
   const color = flat ? colors.flat : up ? colors.up : colors.down;
   const mark = flat ? '–' : up ? '▲' : '▼';
   return (
-    <span style={{ color }}>
+    <span style={{ color }} title={formatPercentExact(pct)}>
       {mark} {Math.abs(pct).toFixed(2)}%
     </span>
   );
@@ -52,7 +54,9 @@ export default function Board({ latest, lastDate, days, since }) {
                 {currency}
                 <span className="sr-only"> {CURRENCY_NOTE[currency]}</span>
               </span>
-              <span className="board__value">{row.value.toFixed(4)}</span>
+              <span className="board__value" title={`1 ${currency} is ₱${formatRateExact(row.value)}`}>
+                {row.value.toFixed(4)}
+              </span>
               <span className="board__delta"><Delta pct={row.dayChange} /></span>
             </li>
           );

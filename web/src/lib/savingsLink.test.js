@@ -95,10 +95,10 @@ test('nothing adjusts when the rows already add up', () => {
 });
 
 test('what is written is what is read back', () => {
-  for (const php of [0, 1, 4999, 30000, 59999.5]) {
+  for (const php of [0, 0.01, 1, 4999, 4999.37, 30000, 38277.2, 59999.5]) {
     const next = applySavings({ rows: rows(), income: INCOME, rate: RATE, php });
     const back = savingsFromBudget({ rows: next, income: INCOME, rate: RATE });
-    assert.equal(back.php, Math.round(php), String(php));
+    assert.equal(back.php, php, String(php));
   }
 });
 

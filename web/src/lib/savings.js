@@ -51,6 +51,14 @@ export function monthlyNeeded(goal, months) {
   return t === 0 ? 0 : g / t;
 }
 
+/**
+ * The monthly amount for a goal, rounded UP to the centavo so the goal is
+ * reached. The small offset keeps binary noise from adding a centavo.
+ */
+export function monthlyToReach(goal, months) {
+  return Math.max(0, Math.ceil(monthlyNeeded(goal, months) * 100 - 1e-9)) / 100; // max avoids a -0
+}
+
 /** Whole months needed to reach a goal at a monthly amount. null if the monthly amount is 0. */
 export function monthsToReach(goal, monthly) {
   const g = clean(goal);

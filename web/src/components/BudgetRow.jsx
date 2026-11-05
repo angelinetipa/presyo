@@ -24,7 +24,7 @@
 
 import { useEffect, useRef } from 'react';
 import { MAX_LABEL, UNITS } from '../constants/budget';
-import { formatMoney, formatPeso } from '../lib/format';
+import { formatMoney, formatMoneyExact, formatPeso, formatPesoExact } from '../lib/format';
 
 const UNIT_NAME = { percent: '%', php: 'PHP' };
 
@@ -95,11 +95,11 @@ export default function BudgetRow({ row, result, currency, color, canRemove, onC
       <div className="brow__out">
         {(result.state === 'filled' || auto) && (
           <>
-            <span className="brow__php">
+            <span className="brow__php" title={formatPesoExact(result.php)}>
               {auto && <span className="brow__tag">auto</span>}
               {formatPeso(result.phpRounded)}
             </span>
-            <span className="brow__src">
+            <span className="brow__src" title={`${currency} ${formatMoneyExact(result.source)}`}>
               {currency} {formatMoney(result.sourceRounded)} · {result.shareRounded}%
             </span>
           </>

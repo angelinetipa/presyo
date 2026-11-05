@@ -169,9 +169,9 @@ test('a difference of more than half a peso is not complete', () => {
 test('shown percents and pesos add up when the split is complete', () => {
   const out = run([row('a', 'percent', '33.3333333'), row('b', 'percent', '33.3333333'), row('c', 'percent', '')], '100', 1);
   assert.equal(out.status, 'complete');
-  const pesos = out.rows.reduce((s, r) => s + r.phpRounded, 0);
+  const centavos = out.rows.reduce((s, r) => s + Math.round(r.phpRounded * 100), 0);
   const shares = out.rows.reduce((s, r) => s + r.shareRounded, 0);
-  assert.equal(pesos, 100);
+  assert.equal(centavos, 10000);
   assert.equal(shares, 100);
 });
 
@@ -186,11 +186,27 @@ test('no rows leaves the whole income unassigned', () => {
   close(out.left, 1000);
 });
 
+test('pesos are rounded to the centavo and the rounded rows add up to the total', () => {
+  // 1000 at 63.5638 is 63,563.80 pesos. 1 / 3 of it does not divide evenly.
+  const out = run([row('a', 'percent', '33.33'), row('b', 'percent', '33.33'), row('c', 'percent', '')], '1000', 63.5638);
+  const centavos = out.rows.map((r) => Math.round(r.phpRounded * 100));
+  assert.equal(centavos.reduce((s, v) => s + v, 0), 6356380);
+  assert.ok(out.rows.every((r) => Math.abs(r.phpRounded * 100 - Math.round(r.phpRounded * 100)) < 1e-9));
+});
+
+test('a peso amount typed to the centavo is shown back unchanged', () => {
+  // 38277.2 * 100 is 3827719.9999999995 in binary. It must not lose a centavo.
+  const out = run([row('a', 'php', '38277.2'), row('b', 'php', '')], '1000', 60);
+  assert.equal(byId(out, 'a').phpRounded, 38277.2);
+  assert.equal(byId(out, 'b').phpRounded, 21722.8);
+});
+
 test('formatValue keeps two decimals at most and drops trailing zeros', () => {
   assert.equal(formatValue(10), '10');
   assert.equal(formatValue(33.3349), '33.33');
   assert.equal(formatValue(12000.004), '12000');
   assert.equal(formatValue(0.1 + 0.2), '0.3');
+  assert.equal(formatValue(1.005), '1.01');
   assert.equal(formatValue(0), '0');
 });
 
@@ -202,6 +218,10 @@ test('parseAmount reads commas and rejects bad values', () => {
   assert.equal(parseAmount('abc'), 0);
   assert.equal(parseAmount(undefined), 0);
   assert.equal(parseAmount(12), 12);
+});
+
+test('roundShares ignores binary noise before it rounds', () => {
+  assert.deepEqual(roundShares([38277.2, 21722.8], 2), [38277.2, 21722.8]);
 });
 
 test('roundShares keeps the sum', () => {

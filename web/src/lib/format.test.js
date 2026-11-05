@@ -3,7 +3,9 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatDay, formatPeso, formatMoney } from './format.js';
+import {
+  formatDay, formatPeso, formatMoney, formatPesoExact, formatMoneyExact, formatRateExact, formatPercentExact,
+} from './format.js';
 
 const ZONES = ['Pacific/Honolulu', 'America/Los_Angeles', 'UTC', 'Asia/Manila', 'Pacific/Auckland'];
 
@@ -29,10 +31,33 @@ test('the first and last day of a month do not slip into the next or previous', 
   delete process.env.TZ;
 });
 
-test('pesos show as whole numbers with a separator', () => {
-  assert.equal(formatPeso(63564), '\u20B163,564');
-  assert.equal(formatPeso(0), '\u20B10');
-  assert.equal(formatPeso(1234567.4), '\u20B11,234,567');
+test('pesos show to the centavo with a separator', () => {
+  assert.equal(formatPeso(63564), '\u20B163,564.00');
+  assert.equal(formatPeso(0), '\u20B10.00');
+  assert.equal(formatPeso(1234567.4), '\u20B11,234,567.40');
+});
+
+test('money rounds half up on the decimal digits, not on the binary value', () => {
+  // toFixed(2) gives 1.00, 2.67 and 0.28 for these.
+  assert.equal(formatPeso(1.005), '\u20B11.01');
+  assert.equal(formatPeso(2.675), '\u20B12.68');
+  assert.equal(formatMoney(0.285), '0.29');
+});
+
+test('exact helpers keep the tiny decimals', () => {
+  assert.equal(formatRateExact(63.7942), '63.794200');
+  assert.equal(formatRateExact(0.401), '0.401000');
+  assert.equal(formatPesoExact(63794.2351234567), '\u20B163,794.23512346');
+  assert.equal(formatPesoExact(63794.2), '\u20B163,794.20');
+  assert.equal(formatMoneyExact(1000), '1,000.00');
+  assert.equal(formatPercentExact(-0.0712345678), '-0.071235%');
+  assert.equal(formatPercentExact(0.29), '+0.29%');
+  assert.equal(formatPercentExact(0), '0.00%');
+});
+
+test('binary noise does not leak into exact money', () => {
+  assert.equal(formatPesoExact(0.1 + 0.2), '\u20B10.30');
+  assert.equal(formatPesoExact(63794.20000000001), '\u20B163,794.20');
 });
 
 test('money shows two decimals', () => {

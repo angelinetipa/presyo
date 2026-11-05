@@ -39,9 +39,11 @@ export default function useBudget(latest) {
 
   const { currency, income, rows } = settings;
   const today = latest[currency]?.value ?? 0;
+  // The field shows four decimals. The maths uses the full stored rate until
+  // the person types their own. The exact value is in the field's hover title.
   const rateShown = rateText ?? (today ? today.toFixed(4) : '');
-  const edited = rateText !== null && parseAmount(rateText) !== Number(today.toFixed(4));
-  const rate = parseAmount(rateShown);
+  const edited = rateText !== null && parseAmount(rateText) !== today;
+  const rate = rateText === null ? today : parseAmount(rateText);
 
   useEffect(() => {
     saveSettings(settings);

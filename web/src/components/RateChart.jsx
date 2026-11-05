@@ -20,7 +20,7 @@ import {
 } from 'recharts';
 import { colors } from '../constants/theme';
 import { rankCurrencies } from '../lib/rank';
-import { formatDay } from '../lib/format';
+import { formatDay, formatRateExact } from '../lib/format';
 import InfoTip from './InfoTip';
 
 const PESO = '₱';
@@ -109,7 +109,7 @@ export default function RateChart({ series, latest, currency, onCurrency }) {
               axisLine={false} tickLine={false}
             />
             <Tooltip
-              formatter={(v) => [`${PESO}${Number(v).toFixed(4)}`, `1 ${active}`]}
+              formatter={(v) => [`${PESO}${formatRateExact(Number(v))}`, `1 ${active}`]}
               labelFormatter={shortDate}
               contentStyle={{
                 border: `1px solid ${colors.rule}`, borderRadius: 10,

@@ -46,7 +46,8 @@ export function parseAmount(input) {
 
 /** Formats a number so it can sit inside an input box. Two decimals at most, no trailing zeros. */
 export function formatValue(n) {
-  return Number(n.toFixed(2)).toString();
+  // Intl rounds the decimal digits half up. toFixed(2) would turn 1.005 into 1.
+  return Number(n.toLocaleString('en-US', { maximumFractionDigits: 2, useGrouping: false })).toString();
 }
 
 /**
@@ -56,7 +57,9 @@ export function formatValue(n) {
  */
 export function roundShares(values, decimals = 0) {
   const factor = 10 ** decimals;
-  const scaled = values.map((v) => v * factor);
+  // Snap away binary noise first. 38277.2 * 100 is 3827719.9999999995, and
+  // its floor would lose a whole centavo.
+  const scaled = values.map((v) => Number((v * factor).toPrecision(14)));
   const floors = scaled.map(Math.floor);
 
   const target = Math.round(scaled.reduce((sum, v) => sum + v, 0));
@@ -180,7 +183,7 @@ export function computeSplit({ total, rate, rows }) {
     it.state === 'filled' && it.row.unit === 'php' ? it.n : sources[i] * r,
   );
   const sourcesRounded = roundShares(sources, 2);
-  const phpsRounded = roundShares(phps, 0);
+  const phpsRounded = roundShares(phps, 2);
   const sharesRounded = roundShares(sources.map((v) => (v / income) * 100), 0);
 
   const assigned = sources.reduce((sum, v) => sum + v, 0);

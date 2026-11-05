@@ -11,7 +11,7 @@
 //   With no such row, the budget and the calculator stay separate.
 //
 // Reading (savingsFromBudget)
-//   Gives the Savings row as a monthly peso amount and a share of income.
+//   Gives the Savings row as a monthly peso amount, to the centavo, and a share of income.
 //   Gives null when the amount cannot be known: no Savings row, no income or
 //   rate, or the Savings row is empty and cannot fill itself yet.
 //
@@ -31,7 +31,7 @@ export function findSavingsRow(rows) {
 
 /**
  * Reads the monthly savings from the budget.
- * Returns { id, label, php, share } or null. php is whole pesos, share is a whole percent.
+ * Returns { id, label, php, share } or null. php is pesos to the centavo, share is a whole percent.
  */
 export function savingsFromBudget({ rows, income, rate }) {
   const row = findSavingsRow(rows);

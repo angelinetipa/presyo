@@ -19,16 +19,19 @@
 
 import { useEffect, useState } from 'react';
 import {
-  PERIODS, TIME_UNITS, toMonths, projectSavings, monthlyNeeded, monthsToReach, describeMonths,
+  PERIODS, TIME_UNITS, toMonths, projectSavings, monthlyNeeded, monthlyToReach, monthsToReach, describeMonths,
 } from '../lib/savings';
 import { findSavingsRow } from '../lib/savingsLink';
 import { parseAmount } from '../lib/split';
-import { formatMoney, formatPeso } from '../lib/format';
+import { formatPeso, formatPesoExact } from '../lib/format';
 import InfoTip from './InfoTip';
 import './SavingsCalc.css';
 
-// Whole pesos from 100 up. Small amounts keep their centavos.
-const money = (n) => (n >= 100 || n === 0 ? formatPeso(n) : `₱${formatMoney(n)}`);
+// Money shows to the centavo. Hovering a figure shows every decimal.
+const money = formatPeso;
+
+// Two amounts are the same when they match to the centavo.
+const sameCents = (a, b) => Math.round(a * 100) === Math.round(b * 100);
 
 // "1 year", "6 months", "1.5 years"
 const spanText = (span, unit) => {
@@ -78,7 +81,7 @@ export default function SavingsCalc({ budget }) {
   const budgetPhp = savings?.php;
   useEffect(() => {
     if (budgetPhp === undefined) return;
-    setMonthlyText((text) => (Math.round(parseAmount(text)) === budgetPhp ? text : String(budgetPhp)));
+    setMonthlyText((text) => (sameCents(parseAmount(text), budgetPhp) ? text : String(budgetPhp)));
   }, [budgetPhp]);
 
   if (available.length === 0) return null;
@@ -93,7 +96,7 @@ export default function SavingsCalc({ budget }) {
   // Works out the monthly amount for a goal and writes it into the budget.
   function changePlan(next) {
     setPlan(next);
-    const need = Math.ceil(monthlyNeeded(parseAmount(next.goal), toMonths(parseAmount(next.span), next.unit)));
+    const need = monthlyToReach(parseAmount(next.goal), toMonths(parseAmount(next.span), next.unit));
     if (linked && need > 0) changeSavings(need);
   }
 
@@ -104,7 +107,7 @@ export default function SavingsCalc({ budget }) {
   // Goal mode
   const goal = parseAmount(plan.goal);
   const goalMonths = toMonths(parseAmount(plan.span), plan.unit);
-  const need = Math.ceil(monthlyNeeded(goal, goalMonths));
+  const need = monthlyToReach(goal, goalMonths);
   const reachMonths = monthsToReach(goal, monthly);
   const covered = need > 0 ? Math.min(100, Math.floor((monthly / need) * 100)) : 0;
   const onTrack = need > 0 && monthly >= need;
@@ -156,7 +159,7 @@ export default function SavingsCalc({ budget }) {
 
           <div className="savecalc__result" aria-live="polite">
             <p className="savecalc__kicker">You will have</p>
-            <p className="savecalc__big">{money(total)}</p>
+            <p className="savecalc__big" title={formatPesoExact(total)}>{money(total)}</p>
             <p className="savecalc__line">
               {months > 0 ? `after ${spanText(when.span, when.unit)}` : 'Enter how long you will save.'}
             </p>
@@ -166,7 +169,7 @@ export default function SavingsCalc({ budget }) {
             {projectSavings(monthly).map((p, i) => (
               <li key={p.id} className="savecalc__row" style={{ '--i': i }}>
                 <span>{p.label}</span>
-                <span>{money(p.total)}</span>
+                <span title={formatPesoExact(p.total)}>{money(p.total)}</span>
               </li>
             ))}
           </ul>
@@ -199,7 +202,9 @@ export default function SavingsCalc({ budget }) {
 
           <div className="savecalc__result" aria-live="polite">
             <p className="savecalc__kicker">Save each month</p>
-            <p className="savecalc__big">{need > 0 ? formatPeso(need) : '₱0'}</p>
+            <p className="savecalc__big" title={need > 0 ? formatPesoExact(monthlyNeeded(goal, goalMonths)) : undefined}>
+              {formatPeso(need)}
+            </p>
             <p className="savecalc__line">
               {need > 0
                 ? `to reach ${formatPeso(goal)} in ${spanText(plan.span, plan.unit)}.`
@@ -229,7 +234,7 @@ export default function SavingsCalc({ budget }) {
                   ? 'Add a monthly amount to see how long it takes.'
                   : `At ${money(monthly)} a month, you reach ${formatPeso(goal)} in ${describeMonths(reachMonths)}.`}
               </p>
-              {linked && Math.round(monthly) !== need && (
+              {linked && !sameCents(monthly, need) && (
                 <button type="button" className="linkbtn" onClick={() => changeSavings(need)}>
                   Set my budget savings to {formatPeso(need)}
                 </button>

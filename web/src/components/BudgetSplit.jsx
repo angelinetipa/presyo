@@ -26,7 +26,7 @@
 import { MAX_ROWS, ROW_COLORS } from '../constants/budget';
 import { parseAmount } from '../lib/split';
 import { findSavingsRow } from '../lib/savingsLink';
-import { formatMoney, formatPeso } from '../lib/format';
+import { formatMoney, formatPeso, formatPesoExact, formatRateExact } from '../lib/format';
 import BudgetRow from './BudgetRow';
 import BudgetNotice from './BudgetNotice';
 import BudgetPresets from './BudgetPresets';
@@ -36,7 +36,7 @@ import './BudgetSplit.css';
 
 export default function BudgetSplit({ budget, series, lastDate }) {
   const {
-    available, currency, income, rows, rateShown, rate, edited, result,
+    available, currency, income, rows, rateShown, rate, edited, today, result,
     changeRow, changeIncome, changeRate, resetRate,
     removeRow, addRow, pickPreset, chooseCurrency, resetAll,
   } = budget;
@@ -140,13 +140,14 @@ export default function BudgetSplit({ budget, series, lastDate }) {
             type="text"
             inputMode="decimal"
             value={rateShown}
+            title={today ? `Today is ${formatRateExact(today)}` : undefined}
             onChange={(e) => changeRate(e.target.value)}
           />
         </div>
 
         <div className="field budget__worth">
           <span className="field__label">Worth each month</span>
-          <p className="budget__php" aria-live="polite">
+          <p className="budget__php" aria-live="polite" title={ready ? formatPesoExact(result.incomePhp) : undefined}>
             {ready ? formatPeso(result.incomePhp) : '–'}
           </p>
         </div>
@@ -167,7 +168,7 @@ export default function BudgetSplit({ budget, series, lastDate }) {
                 key={r.id}
                 className="sbar__seg"
                 style={{ flexGrow: r.source, background: colorOf(i) }}
-                title={`${r.label || 'Row'}: ${formatPeso(r.phpRounded)}`}
+                title={`${r.label || 'Row'} ${formatPeso(r.phpRounded)}`}
               />
             ) : null,
           )}
