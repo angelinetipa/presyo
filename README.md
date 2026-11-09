@@ -161,6 +161,16 @@ npm test
 
 They cover the split maths and auto balance, the savings maths, the link between the budget and the savings calculator, reading saved settings, the presets, and date and money formatting.
 
+The layout is checked in a real browser with Playwright:
+
+```bash
+cd web
+npx playwright install chromium   # first time only
+npm run test:layout
+```
+
+It opens the page at 1920, 1440, 1366, 1280, 1024, 820 and 390 pixels wide, with fake rates so no real data is called. At each size it checks that nothing scrolls sideways, no panel sits on top of another, no figure is cut off, the chart stays readable and the popover stays on screen. The sizes meant to fit one screen are checked for no vertical scroll, and the narrow sizes for one column. On a phone it also checks that inputs are 16px or larger.
+
 ## Layout
 
 ```
