@@ -27,13 +27,13 @@ A small data pipeline that tracks what the Philippine peso is worth, every day, 
 
 | Started | Status | Read | Loaded | Rejected |
 |---|---|---|---|---|
+| 26 Nov 2026 09:27 UTC | PASS | 8 | 8 | 0 |
 | 25 Nov 2026 09:47 UTC | PASS | 8 | 8 | 0 |
 | 24 Nov 2026 10:52 UTC | PASS | 8 | 8 | 0 |
 | 23 Nov 2026 08:57 UTC | PASS | 8 | 8 | 0 |
 | 22 Nov 2026 07:57 UTC | PASS | 8 | 8 | 0 |
-| 21 Nov 2026 08:14 UTC | PASS | 8 | 8 | 0 |
 
-<sub>Updated automatically by the daily workflow · 25 Nov 2026 09:47 UTC</sub>
+<sub>Updated automatically by the daily workflow · 26 Nov 2026 09:27 UTC</sub>
 
 <!-- PRESYO:END -->
 
